@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SprintWidget } from "../components/dashboard/SprintWidget";
 import { WidgetRegistry } from "../services/widgetRegistry";
 import { SprintAdapter } from "../widgets/sprint/sprintAdapter";
 import { validateSprintConfig } from "../widgets/sprint/sprintValidator";
+import { SprintWidget } from "../widgets/sprint/sprintWidget";
 
 export function setupWidgetRegistry(): WidgetRegistry {
   const registry = new WidgetRegistry();

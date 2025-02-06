@@ -16,6 +16,9 @@ widgets:
         required: true
         items:
           type: "string"
+      projectNumber:
+        type: "number"
+        required: true
 
   time:
     type: "time"

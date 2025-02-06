@@ -17,9 +17,23 @@ export class SprintAdapter
     }
 
     try {
-      const projectData = await githubService.fetchProjectItems();
+      const projectData = await githubService.fetchProjectItems(
+        this.config.projectNumber
+      );
       return {
-        items: projectData.items,
+        items: projectData.items.map((item) => ({
+          id: item.id,
+          title: item.title,
+          status: { name: item.status.name },
+          assignees: {
+            nodes: item.assignees.nodes.map((node) => ({
+              login: node.login,
+              avatarUrl: node.avatarUrl,
+            })),
+          },
+          size: { name: item.size.name },
+          priority: { name: item.priority.name },
+        })),
       };
     } catch (error) {
       console.error("Error fetching sprint data:", error);

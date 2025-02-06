@@ -42,7 +42,7 @@ export function SprintWidget({
       {loading ? (
         <div className="text-zinc-500">Loading...</div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {data?.items.map((item) => (
             <div
               key={item.id}
@@ -50,7 +50,31 @@ export function SprintWidget({
             >
               <div className="flex-1">
                 <div className="text-sm text-zinc-200">{item.title}</div>
-                <div className="text-xs text-zinc-500">{item.status.name}</div>
+                <div className="flex gap-4 mt-1 items-center">
+                  <div
+                    className={`text-xs ${
+                      item.status.name === "In Progress"
+                        ? "text-yellow-500"
+                        : "text-zinc-500"
+                    }`}
+                  >
+                    {item.status.name}
+                  </div>
+                  <div
+                    className={`text-xs px-2 py-0.5 rounded-full ${getPriorityColor(
+                      item.priority.name
+                    )}`}
+                  >
+                    {item.priority.name}
+                  </div>
+                  <div
+                    className={`text-xs px-2 py-0.5 rounded-full ${getSizeColor(
+                      item.size?.name
+                    )}`}
+                  >
+                    {item.size?.name}
+                  </div>
+                </div>
               </div>
               <div className="flex -space-x-2">
                 {item.assignees.nodes.map((assignee) => (
@@ -70,3 +94,37 @@ export function SprintWidget({
     </div>
   );
 }
+
+const getPriorityColor = (priority: string): string => {
+  switch (priority.toLowerCase()) {
+    case "p0":
+      return "bg-red-500/20 text-red-500";
+    case "p1":
+      return "bg-orange-500/20 text-orange-500";
+    case "p2":
+      return "bg-yellow-500/20 text-yellow-500";
+    case "p3":
+      return "bg-green-500/20 text-green-500";
+    default:
+      return "bg-zinc-500/20 text-zinc-500";
+  }
+};
+
+const getSizeColor = (size?: string): string => {
+  if (!size) return "bg-zinc-500/20 text-zinc-500";
+
+  switch (size.toLowerCase()) {
+    case "xs":
+      return "bg-blue-300/20 text-blue-300";
+    case "s":
+      return "bg-blue-400/20 text-blue-400";
+    case "m":
+      return "bg-blue-500/20 text-blue-500";
+    case "l":
+      return "bg-blue-600/20 text-blue-600";
+    case "xl":
+      return "bg-blue-700/20 text-blue-700";
+    default:
+      return "bg-zinc-500/20 text-zinc-500";
+  }
+};

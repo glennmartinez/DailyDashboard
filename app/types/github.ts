@@ -8,10 +8,16 @@ export interface ProjectItem {
   status: {
     name: string;
   };
+  priority: {
+    name: string;
+  };
+  size: {
+    name: string;
+  };
   assignees: {
     nodes: {
       login: string;
       avatarUrl: string;
     }[];
   };
-} 
+}

@@ -2,15 +2,11 @@
 name: "Main Daily Dashboard"
 description: "Daily team metrics and status"
 rows:
-  - height: 2
+  - height: 3
     widgets:
       - type: "sprint"
         width: 2
         config:
           owner: "glennmartinez"
           repos: ["repo1"]
-      - type: "sprint"
-        width: 2
-        config:
-          owner: "your-org"
-          repos: ["repo1"]
+          projectNumber: 7
