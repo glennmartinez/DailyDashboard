@@ -1,20 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface DashboardConfig {
-    name: string;
-    description: string;
-    layout: LayoutConfig;
+  id?: string;
+  name: string;
+  description: string;
+  rows: DashboardRow[];
+  widgets?: WidgetConfig[];
 }
 
-interface LayoutConfig {
-    rows: RowConfig[];
+export interface DashboardRow {
+  height: number;
+  widget: WidgetConfig[]; // primary property
+  widgets?: WidgetConfig[]; // optional alias
 }
 
-interface RowConfig {
-    height: number;
-    widget: WidgetConfig[];
-}
-
-interface WidgetConfig {
-    type: string;
-    width: number;
-    config: Record<string, any>;
+export interface WidgetConfig {
+  type: string;
+  width: number;
+  height?: number;
+  config: Record<string, unknown>;
+  component: React.ComponentType<any>;
+  adapters?: string[];
+  props?: Record<string, any>;
 }

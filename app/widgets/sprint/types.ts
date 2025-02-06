@@ -1,11 +1,15 @@
-
 export interface SprintWidgetConfig {
-    owner: string;
-    repos: string[];
-    project: string;
+  owner: string;
+  repos: string[];
+  project: string;
 }
 
 //TODO: Implement SprintData structure
 export interface SprintData {
-    // Define sprint data structure
-  }
+  items: {
+    id: string;
+    title: string;
+    status: { name: string };
+    assignees: { nodes: { login: string; avatarUrl: string }[] };
+  }[];
+}

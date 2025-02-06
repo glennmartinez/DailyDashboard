@@ -1,0 +1,35 @@
+# Widget Definitions
+# This file defines all available widgets and their configurations
+
+widgets:
+  sprint:
+    type: "sprint"
+    defaultWidth: 2
+    defaultHeight: 2
+    component: "SprintWidget"
+    validationRules:
+      owner:
+        type: "string"
+        required: true
+      repos:
+        type: "array"
+        required: true
+        items:
+          type: "string"
+
+  time:
+    type: "time"
+    defaultWidth: 1
+    defaultHeight: 1
+    component: "TimeWidget"
+    validationRules: {}
+
+  build-analytics:
+    type: "build-analytics"
+    defaultWidth: 2
+    defaultHeight: 2
+    component: "BuildAnalyticsWidget"
+    validationRules:
+      pipeline:
+        type: "string"
+        required: true
