@@ -5,7 +5,7 @@ import { TimeWidget } from "../../components/dashboard/TimeWidget";
 import { BuildOverview } from "../../components/dashboard/BuildOverview";
 import { HallOfShame } from "../../components/dashboard/HallOfShame";
 import { BuildNumbers } from "../../components/dashboard/BuildNumbers";
-import { SprintWidget } from "../../components/dashboard/SprintWidget";
+import { SprintWidget } from "../../components/dashboard/SprintWidgetSample";
 import { BuildAnalyticsWidget } from "../../components/dashboard/BuildAnalyticsWidget";
 
 export default function SampleDashboard() {

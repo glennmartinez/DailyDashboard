@@ -1,46 +1,47 @@
 import { SprintWidgetConfig } from "./types";
 
-export function validateSprintConfig(config: unknown): {
-  valid: boolean;
-  errors: string[];
-} {
-  const errors: string[] = [];
+export interface WidgetConfigValidator<T> {
+  validate(config: T): boolean;
+}
 
-  if (typeof config !== "object" || config === null) {
-    errors.push("Configuration must be an object.");
-    return { valid: false, errors };
-  }
-
-  const conf = config as SprintWidgetConfig;
-
-  // Validate owner: must be a non-empty string.
-  if (typeof conf.owner !== "string" || conf.owner.trim() === "") {
-    errors.push("The 'owner' field must be a non-empty string.");
-  }
-
-  // Validate repos: must be an array with at least one non-empty string.
-  if (!Array.isArray(conf.repos)) {
-    errors.push("The 'repos' field must be an array.");
-  } else if (conf.repos.length === 0) {
-    errors.push("The 'repos' array must contain at least one repository.");
-  } else {
-    for (const repo of conf.repos) {
-      if (typeof repo !== "string" || repo.trim() === "") {
-        errors.push(
-          "Each entry in the 'repos' array must be a non-empty string."
-        );
-        break;
-      }
+export class SprintValidator
+  implements WidgetConfigValidator<SprintWidgetConfig>
+{
+  validate(config: SprintWidgetConfig): boolean {
+    if (!config || typeof config !== "object") {
+      console.error("Configuration must be an object.");
+      return false;
     }
-  }
 
-  // Validate project: must be a non-empty string.
-  if (typeof conf.project !== "string" || conf.project.trim() === "") {
-    errors.push("The 'project' field must be a non-empty string.");
-  }
+    // Validate owner
+    if (typeof config.owner !== "string" || config.owner.trim() === "") {
+      console.error("The 'owner' field must be a non-empty string.");
+      return false;
+    }
 
-  return {
-    valid: errors.length === 0,
-    errors,
-  };
+    // Validate repos
+    if (!Array.isArray(config.repos) || config.repos.length === 0) {
+      console.error("The 'repos' field must be a non-empty array.");
+      return false;
+    }
+
+    if (
+      config.repos.some(
+        (repo) => typeof repo !== "string" || repo.trim() === ""
+      )
+    ) {
+      console.error(
+        "Each entry in the 'repos' array must be a non-empty string."
+      );
+      return false;
+    }
+
+    // Validate project
+    if (typeof config.project !== "string" || config.project.trim() === "") {
+      console.error("The 'project' field must be a non-empty string.");
+      return false;
+    }
+
+    return true;
+  }
 }

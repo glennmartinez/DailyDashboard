@@ -20,6 +20,12 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Dashboard System Architecture
+
+This project implements a flexible dashboard system that supports dynamic widget configuration and layout management. The system is built with a modular architecture that separates concerns between dashboard management, widget registration, and configuration handling.
+
+For detailed information about the system's architecture, including class diagrams and component relationships, please refer to our [Architecture Documentation](docs/ARCHITECTURE.md).
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

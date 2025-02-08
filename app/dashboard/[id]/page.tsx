@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { DashboardLayout } from "../../components/layout/DashboardLayout";
+import { DashboardLayout, DashboardRow, DashboardWidget } from "../../components/layout/DashboardLayout";
 import { DashboardConfig } from "../../types/dashboard";
-import { setupWidgetRegistry } from "../../config/widgets";
+import { setupWidgetRegistry } from "../../widgets/widgets-registry";
 
 export default function DynamicDashboard({
   params: paramsPromise,
@@ -52,33 +52,31 @@ export default function DynamicDashboard({
 
   return (
     <DashboardLayout>
-      <div className="grid grid-cols-4 gap-4 p-4">
-        {dashboard.rows.map((row, rowIndex) => (
-          <div key={rowIndex} className="col-span-4">
-            <div className="grid grid-cols-4 gap-4">
-              {row.widgets.map((widget, widgetIndex) => {
-                const widgetDef = widgetRegistry.getWidget(widget.type);
-                if (!widgetDef) {
-                  console.error(
-                    `Widget type ${widget.type} not found in registry`
-                  );
-                  return null;
-                }
-                const WidgetComponent = widgetDef.component;
-                return (
-                  <WidgetComponent
-                    key={`${rowIndex}-${widgetIndex}`}
-                    config={widget.config}
-                    width={widget.width}
-                    height={widget.height || widgetDef.defaultHeight}
-                    adapters={[widgetDef.adapter]}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
+      {dashboard.rows.map((row, rowIndex) => (
+        <DashboardRow key={rowIndex} height={row.height}>
+          {row.widgets.map((widget, widgetIndex) => {
+            const widgetDef = widgetRegistry.getWidget(widget.type);
+            if (!widgetDef) {
+              console.error(`Widget type ${widget.type} not found in registry`);
+              return null;
+            }
+            const WidgetComponent = widgetDef.component;
+            return (
+              <DashboardWidget
+                key={`${rowIndex}-${widgetIndex}`}
+                width={widget.width}
+              >
+                <WidgetComponent
+                  config={widget.config}
+                  width={widget.width}
+                  height={widget.height || widgetDef.defaultHeight}
+                  adapters={[widgetDef.adapter]}
+                />
+              </DashboardWidget>
+            );
+          })}
+        </DashboardRow>
+      ))}
     </DashboardLayout>
   );
 }

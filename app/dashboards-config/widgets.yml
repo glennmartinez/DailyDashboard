@@ -2,6 +2,13 @@
 # This file defines all available widgets and their configurations
 
 widgets:
+  motivational:
+    type: "motivational"
+    defaultWidth: 2
+    defaultHeight: 1
+    component: "MotivationalWidget"
+    validationRules: {}
+
   sprint:
     type: "sprint"
     defaultWidth: 2

@@ -2,11 +2,18 @@
 name: "Main Daily Dashboard"
 description: "Daily team metrics and status"
 rows:
-  - height: 3
+  - height: 4 # This row takes 33.32% of viewport height (4 * 8.33)
     widgets:
       - type: "sprint"
-        width: 2
+        width: 6 # Takes half the row width (6/12)
         config:
           owner: "glennmartinez"
           repos: ["repo1"]
           projectNumber: 7
+      - type: "motivational"
+        width: 2 # Takes quarter of row width (3/12)
+      - type: "milestone"
+        width: 4 # Takes quarter of row width (3/12)
+        config:
+          owner: "glennmartinez"
+          repo: "habito-mobile"

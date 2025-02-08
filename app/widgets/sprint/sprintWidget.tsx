@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { WidgetProps } from "../../types/widget";
 import { SprintWidgetConfig, SprintData } from "./types";
 
@@ -78,11 +79,13 @@ export function SprintWidget({
               </div>
               <div className="flex -space-x-2">
                 {item.assignees.nodes.map((assignee) => (
-                  <img
+                  <Image
                     key={assignee.login}
                     src={assignee.avatarUrl}
                     alt={assignee.login}
-                    className="w-6 h-6 rounded-full border border-black"
+                    width={24}
+                    height={24}
+                    className="rounded-full border border-black"
                     title={assignee.login}
                   />
                 ))}

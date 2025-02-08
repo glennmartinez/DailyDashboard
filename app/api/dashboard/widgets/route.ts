@@ -3,7 +3,20 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import yaml from "js-yaml";
-
+/**
+ * @swagger
+ * /api/dashboard/widgets:
+ *   get:
+ *     summary: Get widget definitions
+ *     description: Retrieve the widget definitions from the widgets.yml file.
+ *     responses:
+ *       200:
+ *         description: Widget definitions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ * */
 export async function GET() {
   try {
     // Read the widgets.yml file
