@@ -17,3 +17,11 @@ rows:
         config:
           owner: "glennmartinez"
           repo: "habito-mobile"
+  - height: 4 # Second row for analytics
+    widgets:
+      - type: "issues-analytics"
+        width: 12 # Full width for analytics dashboard
+        config:
+          owner: "glennmartinez"
+          repo: "habito-mobile"
+          timeRange: "month"

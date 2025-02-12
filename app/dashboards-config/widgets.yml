@@ -43,3 +43,33 @@ widgets:
       pipeline:
         type: "string"
         required: true
+
+  issues-analytics:
+    type: "issues-analytics"
+    defaultWidth: 6
+    defaultHeight: 2
+    component: "IssuesAnalyticsWidget"
+    validationRules:
+      owner:
+        type: "string"
+        required: true
+      repo:
+        type: "string"
+        required: true
+      timeRange:
+        type: "string"
+        enum: ["week", "month", "quarter"]
+        required: false
+
+  milestone:
+    type: "milestone"
+    defaultWidth: 4
+    defaultHeight: 2
+    component: "MilestoneWidget"
+    validationRules:
+      owner:
+        type: "string"
+        required: true
+      repo:
+        type: "string"
+        required: true

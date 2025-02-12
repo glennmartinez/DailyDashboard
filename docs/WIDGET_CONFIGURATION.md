@@ -165,9 +165,9 @@ rows:
 
 ### 3. Important Notes
 
-- Each row's total width must not exceed the maximum row width (default: 4)
+- Each row's total width must not exceed the maximum row width (default: 12)
 - Widget configurations are validated against their respective validation rules
-- Widget dimensions (width/height) are specified in grid units
+- Widget dimensions (width/height) are specified in grid units (1-12)
 - Default dimensions can be overridden in the dashboard configuration
 
 ## Loading and Registration

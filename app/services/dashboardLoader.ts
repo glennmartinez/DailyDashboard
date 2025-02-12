@@ -11,7 +11,7 @@ import {
 import { WidgetRegistry } from "./widgetRegistry";
 
 // Define a maximum allowed row width (e.g. grid columns available)
-const MAX_ROW_WIDTH = 4;
+const MAX_ROW_WIDTH = 12;
 
 export class DashboardLoader {
   private widgetRegistry: WidgetRegistry;
@@ -131,7 +131,7 @@ export class DashboardLoader {
   private validateRow(row: any, fileName: string): boolean {
     // Use "widgets" or "widget" from the YAML row
     const widgets: WidgetConfig[] =
-      (row as DashboardRow).widgets || (row as DashboardRow).widget || [];
+      (row as DashboardRow).widgets || (row as DashboardRow).widgets || [];
     if (!Array.isArray(widgets)) {
       console.error(
         `Row in file ${fileName} is missing a valid widgets array.`

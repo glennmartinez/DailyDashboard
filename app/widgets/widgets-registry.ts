@@ -8,6 +8,8 @@ import { MotivationalAdapter } from "./motivational/motivationalAdapter";
 import { MilestoneWidget } from "./milestone/milestoneWidget";
 import { MilestoneAdapter } from "./milestone/milestoneAdapter";
 import { MilestoneValidator } from "./milestone/milestoneValidator";
+import { IssuesAnalyticsWidget } from "./issues-analytics/IssuesAnalyticsWidget";
+import { IssuesAnalyticsAdapter } from "./issues-analytics/issuesAnalyticsAdapter";
 
 function registerWidget(
   registry: WidgetRegistry,
@@ -67,6 +69,30 @@ export function setupWidgetRegistry(): WidgetRegistry {
     },
     2,
     1
+  );
+
+  registerWidget(
+    registry,
+    "issues-analytics",
+    IssuesAnalyticsWidget,
+    new IssuesAnalyticsAdapter(),
+    (config: any): boolean => {
+      if (!config?.owner || typeof config.owner !== "string") {
+        return false;
+      }
+      if (!config?.repo || typeof config.repo !== "string") {
+        return false;
+      }
+      if (
+        config.timeRange &&
+        !["week", "month", "quarter"].includes(config.timeRange)
+      ) {
+        return false;
+      }
+      return true;
+    },
+    6,
+    2
   );
 
   return registry;

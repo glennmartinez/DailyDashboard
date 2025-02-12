@@ -1,5 +1,4 @@
 export interface MilestoneWidgetConfig {
-  projectNumber: number;
   owner: string;
   repo: string;
 }
