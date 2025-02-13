@@ -73,3 +73,19 @@ widgets:
       repo:
         type: "string"
         required: true
+
+  repo-health:
+    type: "repo-health"
+    defaultWidth: 6
+    defaultHeight: 2
+    component: "RepoHealthWidget"
+    validationRules:
+      owner:
+        type: "string"
+        required: true
+      repo:
+        type: "string"
+        required: true
+      branch:
+        type: "string"
+        required: false

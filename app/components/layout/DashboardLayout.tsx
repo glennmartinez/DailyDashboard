@@ -7,13 +7,8 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, className }: DashboardLayoutProps) {
   return (
-    <div className="min-h-screen bg-zinc-900 p-6">
-      <div
-        className={cn(
-          "max-w-[2000px] mx-auto grid auto-rows-min gap-4",
-          className
-        )}
-      >
+    <div className="min-h-screen bg-zinc-900 p-4">
+      <div className={cn("max-w-[2000px] mx-auto space-y-1", className)}>
         {children}
       </div>
     </div>
@@ -31,10 +26,9 @@ export function DashboardRow({
 }) {
   return (
     <div
-      className={cn("grid grid-cols-12 gap-4", className)}
+      className={cn("grid grid-cols-12 gap-1", className)}
       style={{
-        // Convert height units to viewport height
-        minHeight: `${height * 8.33}vh`,
+        minHeight: `${height * 6}vh`,
       }}
     >
       {children}

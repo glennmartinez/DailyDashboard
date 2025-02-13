@@ -10,6 +10,8 @@ import { MilestoneAdapter } from "./milestone/milestoneAdapter";
 import { MilestoneValidator } from "./milestone/milestoneValidator";
 import { IssuesAnalyticsWidget } from "./issues-analytics/IssuesAnalyticsWidget";
 import { IssuesAnalyticsAdapter } from "./issues-analytics/issuesAnalyticsAdapter";
+import { RepoHealthWidget } from "./repo-health/RepoHealthWidget";
+import { RepoHealthAdapter } from "./repo-health/repoHealthAdapter";
 
 function registerWidget(
   registry: WidgetRegistry,
@@ -87,6 +89,27 @@ export function setupWidgetRegistry(): WidgetRegistry {
         config.timeRange &&
         !["week", "month", "quarter"].includes(config.timeRange)
       ) {
+        return false;
+      }
+      return true;
+    },
+    6,
+    2
+  );
+
+  registerWidget(
+    registry,
+    "repo-health",
+    RepoHealthWidget,
+    new RepoHealthAdapter(),
+    (config: any): boolean => {
+      if (!config?.owner || typeof config.owner !== "string") {
+        return false;
+      }
+      if (!config?.repo || typeof config.repo !== "string") {
+        return false;
+      }
+      if (config.branch && typeof config.branch !== "string") {
         return false;
       }
       return true;

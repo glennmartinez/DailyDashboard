@@ -2,7 +2,7 @@
 name: "Main Daily Dashboard"
 description: "Daily team metrics and status"
 rows:
-  - height: 4 # This row takes 33.32% of viewport height (4 * 8.33)
+  - height: 5 # This row takes 30vh (5 * 6)
     widgets:
       - type: "sprint"
         width: 6 # Takes half the row width (6/12)
@@ -17,11 +17,16 @@ rows:
         config:
           owner: "glennmartinez"
           repo: "habito-mobile"
-  - height: 4 # Second row for analytics
+  - height: 5 # Second row, split between issues and repo health
     widgets:
       - type: "issues-analytics"
-        width: 12 # Full width for analytics dashboard
+        width: 6 # Half width for analytics dashboard
         config:
           owner: "glennmartinez"
           repo: "habito-mobile"
           timeRange: "month"
+      - type: "repo-health"
+        width: 6 # Half width for repo health
+        config:
+          owner: "glennmartinez"
+          repo: "habito-mobile"
