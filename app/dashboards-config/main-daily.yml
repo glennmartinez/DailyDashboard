@@ -1,32 +1,39 @@
 # File: app/dashboards/main-daily.yml
 name: "Main Daily Dashboard"
 description: "Daily team metrics and status"
-rows:
-  - height: 5 # This row takes 30vh (5 * 6)
-    widgets:
-      - type: "sprint"
-        width: 6 # Takes half the row width (6/12)
-        config:
-          owner: "glennmartinez"
-          repos: ["repo1"]
-          projectNumber: 7
-      - type: "motivational"
-        width: 2 # Takes quarter of row width (3/12)
-      - type: "milestone"
-        width: 4 # Takes quarter of row width (3/12)
-        config:
-          owner: "glennmartinez"
-          repo: "habito-mobile"
-  - height: 5 # Second row, split between issues and repo health
-    widgets:
-      - type: "issues-analytics"
-        width: 6 # Half width for analytics dashboard
-        config:
-          owner: "glennmartinez"
-          repo: "habito-mobile"
-          timeRange: "month"
-      - type: "repo-health"
-        width: 6 # Half width for repo health
-        config:
-          owner: "glennmartinez"
-          repo: "habito-mobile"
+widgets:
+  - type: "sprint"
+    width: 6
+    height: 5
+    config:
+      owner: "glennmartinez"
+      repos: ["repo1"]
+      projectNumber: 7
+  - type: "motivational"
+    width: 2
+    height: 5
+  - type: "milestone"
+    width: 4
+    height: 5
+    config:
+      owner: "glennmartinez"
+      repo: "habito-mobile"
+  - type: "issues-analytics"
+    width: 6
+    height: 10
+    config:
+      owner: "glennmartinez"
+      repo: "habito-mobile"
+      timeRange: "month"
+  - type: "repo-health"
+    width: 3
+    height: 6
+    config:
+      owner: "glennmartinez"
+      repo: "habito-mobile"
+  - type: "workflow-builds"
+    width: 3
+    height: 4
+    config:
+      owner: "glennmartinez"
+      repo: "habito-mobile"

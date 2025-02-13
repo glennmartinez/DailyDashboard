@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import yaml from "js-yaml";
-import { DashboardConfig } from "../../../types/dashboard";
+import { DashboardConfig } from "@/app/types/dashboard";
 
 export async function GET(
   request: Request,
@@ -21,7 +21,7 @@ export async function GET(
     // Check if file exists
     if (!fs.existsSync(filePath)) {
       return new NextResponse(
-        JSON.stringify({ error: "Dashboard not found" }),
+        JSON.stringify({ message: "Dashboard not found" }),
         {
           status: 404,
           headers: { "Content-Type": "application/json" },
@@ -34,7 +34,7 @@ export async function GET(
 
     if (!config) {
       return new NextResponse(
-        JSON.stringify({ error: "Invalid dashboard configuration" }),
+        JSON.stringify({ message: "Invalid dashboard configuration" }),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
@@ -52,7 +52,7 @@ export async function GET(
   } catch (error) {
     console.error("Error loading dashboard:", error);
     return new NextResponse(
-      JSON.stringify({ error: "Failed to load dashboard" }),
+      JSON.stringify({ message: "Failed to load dashboard" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json" },

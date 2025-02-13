@@ -3,11 +3,7 @@
 // It assumes your project has a DashboardConfig type, a WidgetRegistry already set up,
 // and that widget definitions include defaultWidth/defaultHeight and a validateConfig function.
 
-import {
-  DashboardConfig,
-  DashboardRow,
-  WidgetConfig,
-} from "../types/dashboard";
+import { DashboardConfig } from "../types/dashboard";
 import { WidgetRegistry } from "./widgetRegistry";
 
 // Define a maximum allowed row width (e.g. grid columns available)
@@ -18,6 +14,10 @@ export class DashboardLoader {
 
   constructor(widgetRegistry: WidgetRegistry) {
     this.widgetRegistry = widgetRegistry;
+  }
+
+  static create(widgetRegistry: WidgetRegistry): DashboardLoader {
+    return new DashboardLoader(widgetRegistry);
   }
 
   async loadWidgetDefinitions(): Promise<void> {
@@ -49,13 +49,14 @@ export class DashboardLoader {
           definition.validationRules
         );
 
-        this.widgetRegistry.registerWidget(name, {
-          defaultWidth: definition.defaultWidth,
-          defaultHeight: definition.defaultHeight,
-          component: definition.component,
-          validateConfig: validationFunction,
-          adapter: definition.adapter,
-        });
+        if (typeof validationFunction === "function") {
+          this.widgetRegistry.registerWidget(name, {
+            ...definition,
+            validator: validationFunction,
+          });
+        } else {
+          this.widgetRegistry.registerWidget(name, definition);
+        }
       });
     } catch (err) {
       console.error("Error loading widget definitions:", err);
@@ -115,23 +116,55 @@ export class DashboardLoader {
     dashboardConfig: DashboardConfig,
     fileName: string
   ): boolean {
-    if (!dashboardConfig.rows) {
-      console.error(`Dashboard config in ${fileName} does not contain rows.`);
+    if (!dashboardConfig.widgets) {
+      console.error(
+        `Dashboard config in ${fileName} does not contain widgets.`
+      );
       return false;
     }
 
-    for (const row of dashboardConfig.rows) {
-      if (!this.validateRow(row, fileName)) {
+    for (const widget of dashboardConfig.widgets) {
+      const widgetDef = this.widgetRegistry.getWidget(widget.type);
+      if (!widgetDef) {
+        console.error(
+          `Widget type "${widget.type}" in file ${fileName} is not registered.`
+        );
+        return false;
+      }
+
+      if (!widget.position) {
+        widget.position = { row: 0, col: 0 }; // Initialize with default row and col
+      }
+
+      // Use the widget's default width if it isn't specified
+      if (!widget.position.width) {
+        widget.position.width = widgetDef.defaultWidth;
+      }
+
+      // Validate widget configuration
+      try {
+        if (widgetDef.validator) {
+          if (!widgetDef.validator(widget.config || {})) {
+            console.error(
+              `Widget of type "${widget.type}" in file ${fileName} has invalid configuration`
+            );
+            return false;
+          }
+        }
+      } catch (err: any) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.error(
+          `Widget of type "${widget.type}" in file ${fileName} has invalid configuration: ${errorMessage}`
+        );
         return false;
       }
     }
+
     return true;
   }
 
   private validateRow(row: any, fileName: string): boolean {
-    // Use "widgets" or "widget" from the YAML row
-    const widgets: WidgetConfig[] =
-      (row as DashboardRow).widgets || (row as DashboardRow).widgets || [];
+    const widgets = row.widgets || [];
     if (!Array.isArray(widgets)) {
       console.error(
         `Row in file ${fileName} is missing a valid widgets array.`
@@ -141,7 +174,6 @@ export class DashboardLoader {
 
     let totalRowWidth = 0;
     for (const widget of widgets) {
-      // Look up the widget type in the registry
       const widgetDef = this.widgetRegistry.getWidget(widget.type);
       if (!widgetDef) {
         console.error(
@@ -149,15 +181,21 @@ export class DashboardLoader {
         );
         return false;
       }
-      // Use the widget's default width if it isn't specified
+
       if (typeof widget.width !== "number") {
         widget.width = widgetDef.defaultWidth;
       }
       totalRowWidth += widget.width;
 
-      // Validate widget configuration using its validator.
       try {
-        widgetDef.validateConfig(widget.config);
+        if (widgetDef.validator) {
+          if (!widgetDef.validator(widget.config || {})) {
+            console.error(
+              `Widget of type "${widget.type}" in file ${fileName} has invalid configuration`
+            );
+            return false;
+          }
+        }
       } catch (err: any) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         console.error(
@@ -192,5 +230,84 @@ export class DashboardLoader {
       console.error(`Error retrieving dashboard with id ${id}:`, err);
       return null;
     }
+  }
+
+  private convertNestedConfigToFlat(config: any): DashboardConfig {
+    if (!config.rows) return config;
+
+    let currentRow = 0;
+    const widgets = [];
+
+    for (const row of config.rows) {
+      if (Array.isArray(row.widgets)) {
+        let currentCol = 0;
+        for (const widget of row.widgets) {
+          if (widget.isNested && Array.isArray(widget.widgets)) {
+            // Handle nested widgets
+            for (const nestedWidget of widget.widgets) {
+              widgets.push({
+                id: `${widgets.length}`,
+                type: nestedWidget.type,
+                title: nestedWidget.title,
+                position: {
+                  row: currentRow,
+                  col: currentCol,
+                  width: nestedWidget.width,
+                  height: nestedWidget.height,
+                },
+                config: nestedWidget.config,
+              });
+              currentCol += nestedWidget.width;
+            }
+          } else {
+            // Handle regular widgets
+            widgets.push({
+              id: `${widgets.length}`,
+              type: widget.type,
+              title: widget.title,
+              position: {
+                row: currentRow,
+                col: currentCol,
+                width: widget.width,
+                height: widget.height || row.height,
+              },
+              config: widget.config,
+            });
+            currentCol += widget.width;
+          }
+        }
+      }
+      currentRow++;
+    }
+
+    return {
+      id: config.id,
+      title: config.name,
+      description: config.description,
+      layout: {
+        rows: config.rows.length,
+        columns: 12,
+      },
+      widgets,
+    };
+  }
+
+  async loadDashboardConfig(path: string): Promise<DashboardConfig | null> {
+    try {
+      const response = await fetch(`/api/dashboard/${path}`);
+      if (!response.ok) {
+        throw new Error("Failed to load dashboard configuration");
+      }
+      const rawConfig = await response.json();
+      const config = this.convertNestedConfigToFlat(rawConfig);
+      return this.validateDashboardConfig(config, path) ? config : null;
+    } catch (error) {
+      console.error("Error loading dashboard configuration:", error);
+      return null;
+    }
+  }
+
+  validateDashboard(config: DashboardConfig): boolean {
+    return this.validateDashboardConfig(config, config.id || "unknown");
   }
 }

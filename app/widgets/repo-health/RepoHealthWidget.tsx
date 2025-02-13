@@ -42,7 +42,7 @@ export function RepoHealthWidget({
 
   if (loading) {
     return (
-      <div className="bg-black rounded-sm p-4">
+      <div className="bg-black rounded-sm p-4 h-full">
         <div className="text-zinc-500">Loading repository health...</div>
       </div>
     );
@@ -50,14 +50,20 @@ export function RepoHealthWidget({
 
   if (!data) {
     return (
-      <div className="bg-black rounded-sm p-4">
+      <div className="bg-black rounded-sm p-4 h-full">
         <div className="text-zinc-500">No data available</div>
       </div>
     );
   }
 
+  const getCoverageColor = (percentage: number) => {
+    if (percentage < 25) return "text-red-500";
+    if (percentage <= 60) return "text-orange-500";
+    return "text-green-500";
+  };
+
   return (
-    <div className="bg-black rounded-sm p-4">
+    <div className="bg-black rounded-sm p-4 h-full">
       <h2 className="text-lg font-bold text-zinc-200 mb-4">
         REPOSITORY HEALTH
       </h2>
@@ -70,7 +76,11 @@ export function RepoHealthWidget({
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-zinc-900 p-3 rounded-sm">
             <div className="text-zinc-500 text-sm">Coverage</div>
-            <div className="text-lg font-bold text-zinc-200">
+            <div
+              className={`text-lg font-bold ${getCoverageColor(
+                data.coverage.percentage
+              )}`}
+            >
               {data.coverage.percentage.toFixed(1)}%
             </div>
           </div>
@@ -102,7 +112,7 @@ export function RepoHealthWidget({
         <h3 className="text-sm font-medium text-zinc-400 mb-2">
           Coverage Trend
         </h3>
-        <div className="h-32">
+        <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data.coverage.trend}>
               <XAxis
@@ -153,42 +163,6 @@ export function RepoHealthWidget({
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Recent Workflow Runs */}
-      <div>
-        <h3 className="text-sm font-medium text-zinc-400 mb-2">
-          Recent Workflow Runs
-        </h3>
-        <div className="space-y-2">
-          {data.recentWorkflowRuns.map((run, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between bg-zinc-900 p-2 rounded-sm"
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    run.conclusion === "SUCCESS"
-                      ? "bg-green-500"
-                      : run.conclusion === "FAILURE"
-                      ? "bg-red-500"
-                      : "bg-yellow-500"
-                  }`}
-                />
-                <span className="text-sm text-zinc-300">{run.name}</span>
-              </div>
-              <span className="text-xs text-zinc-500">
-                {new Date(run.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-            </div>
-          ))}
         </div>
       </div>
     </div>

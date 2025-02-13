@@ -1,9 +1,11 @@
+import { ReactNode } from "react";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface WidgetProps<T = any> {
   config: T;
-  width: number;
-  height: number;
   adapters: WidgetAdapter<T, any>[];
+  width: number;
+  height?: number;
 }
 
 export interface WidgetAdapter<TConfig = any, TData = any> {
@@ -12,9 +14,9 @@ export interface WidgetAdapter<TConfig = any, TData = any> {
 }
 
 export interface WidgetDefinition<TConfig = any, TData = any> {
-  component: React.ComponentType<WidgetProps<TConfig>>;
+  component: (props: WidgetProps<TConfig>) => ReactNode;
   adapter: WidgetAdapter<TConfig, TData>;
-  validateConfig: (config: any) => boolean;
+  validator: (config: TConfig) => boolean;
   defaultWidth: number;
   defaultHeight: number;
 }

@@ -1,82 +1,75 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
-import { DashboardLayout, DashboardRow, DashboardWidget } from "../../components/layout/DashboardLayout";
-import { DashboardConfig } from "../../types/dashboard";
+import { DashboardLoader } from "../../services/dashboardLoader";
+import { ClientDashboard } from "../../components/ClientDashboard";
 import { setupWidgetRegistry } from "../../widgets/widgets-registry";
+import { Suspense, useEffect, useState } from "react";
+import { Dashboard } from "@/app/types/dashboard";
+import { useParams } from "next/navigation";
 
-export default function DynamicDashboard({
-  params: paramsPromise,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const params = use(paramsPromise);
-  const [dashboard, setDashboard] = useState<DashboardConfig | null>(null);
-  const [loading, setLoading] = useState(true);
-  const widgetRegistry = setupWidgetRegistry();
+const DashboardPage = () => {
+  const params = useParams();
+  const id = params.id as string;
+
+  const [dashboardConfig, setDashboardConfig] = useState<Dashboard | null>(
+    null
+  );
+  const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
+    const registry = setupWidgetRegistry();
+    const loader = DashboardLoader.create(registry);
+
     const loadDashboard = async () => {
-      try {
-        const response = await fetch(`/api/dashboard/${params.id}`);
-        if (!response.ok) {
-          throw new Error("Failed to load dashboard");
-        }
-        const data = await response.json();
-        setDashboard(data);
-      } catch (error) {
-        console.error("Error loading dashboard:", error);
-      } finally {
-        setLoading(false);
+      if (!id) return;
+
+      const config = await loader.loadDashboardConfig(id);
+      if (!config || !loader.validateDashboard(config)) {
+        setError(true);
+        return;
       }
+
+      const dashboard: Dashboard = {
+        name: config.title,
+        description: config.description || "",
+        rows: [
+          {
+            height: config.layout?.rows || 1,
+            widgets: config.widgets.map((w) => ({
+              type: w.type,
+              width: w.position.width || 1,
+              height: w.position.height,
+              config: w.config || {},
+            })),
+          },
+        ],
+      };
+
+      setDashboardConfig(dashboard);
     };
 
     loadDashboard();
-  }, [params.id]);
+  }, [id]);
 
-  if (loading) {
+  if (error) {
     return (
-      <DashboardLayout>
-        <div className="text-zinc-500">Loading dashboard...</div>
-      </DashboardLayout>
+      <div className="text-red-500 p-4">
+        Error: Invalid dashboard configuration
+      </div>
     );
   }
 
-  if (!dashboard) {
-    return (
-      <DashboardLayout>
-        <div className="text-zinc-500">Dashboard not found</div>
-      </DashboardLayout>
-    );
+  if (!dashboardConfig) {
+    return <div className="text-zinc-500 p-4">Loading dashboard...</div>;
   }
 
   return (
-    <DashboardLayout>
-      {dashboard.rows.map((row, rowIndex) => (
-        <DashboardRow key={rowIndex} height={row.height}>
-          {row.widgets.map((widget, widgetIndex) => {
-            const widgetDef = widgetRegistry.getWidget(widget.type);
-            if (!widgetDef) {
-              console.error(`Widget type ${widget.type} not found in registry`);
-              return null;
-            }
-            const WidgetComponent = widgetDef.component;
-            return (
-              <DashboardWidget
-                key={`${rowIndex}-${widgetIndex}`}
-                width={widget.width}
-              >
-                <WidgetComponent
-                  config={widget.config}
-                  width={widget.width}
-                  height={widget.height || widgetDef.defaultHeight}
-                  adapters={[widgetDef.adapter]}
-                />
-              </DashboardWidget>
-            );
-          })}
-        </DashboardRow>
-      ))}
-    </DashboardLayout>
+    <Suspense
+      fallback={<div className="text-zinc-500 p-4">Loading dashboard...</div>}
+    >
+      <ClientDashboard dashboardData={dashboardConfig} />
+    </Suspense>
   );
-}
+};
+
+export default DashboardPage;

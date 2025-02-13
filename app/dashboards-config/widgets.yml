@@ -89,3 +89,19 @@ widgets:
       branch:
         type: "string"
         required: false
+
+  workflow-builds:
+    type: "workflow-builds"
+    defaultWidth: 6
+    defaultHeight: 4
+    component: "WorkflowBuildsWidget"
+    validationRules:
+      owner:
+        type: "string"
+        required: true
+      repo:
+        type: "string"
+        required: true
+      branch:
+        type: "string"
+        required: false

@@ -37,10 +37,10 @@ export class SprintValidator
     }
 
     // Validate project
-    if (typeof config.project !== "string" || config.project.trim() === "") {
-      console.error("The 'project' field must be a non-empty string.");
-      return false;
-    }
+    // if (typeof config.project !== "string" || config.project.trim() === "") {
+    //   console.error("The 'project' field must be a non-empty string.");
+    //   return false;
+    // }
 
     return true;
   }
