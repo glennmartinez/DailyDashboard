@@ -7,7 +7,7 @@ import { SprintWidget } from "./sprint/sprintWidget";
 import { MotivationalAdapter } from "./motivational/motivationalAdapter";
 import { MilestoneWidget } from "./milestone/milestoneWidget";
 import { MilestoneAdapter } from "./milestone/milestoneAdapter";
-import { MilestoneValidator } from "./milestone/milestoneValidator";
+import { milestoneValidator } from "./milestone/milestoneValidator";
 import { IssuesAnalyticsWidget } from "./issues-analytics/IssuesAnalyticsWidget";
 import { IssuesAnalyticsAdapter } from "./issues-analytics/issuesAnalyticsAdapter";
 import { RepoHealthWidget } from "./repo-health/RepoHealthWidget";
@@ -15,108 +15,68 @@ import { RepoHealthAdapter } from "./repo-health/repoHealthAdapter";
 import { WorkflowBuildsWidget } from "./workflow-builds/WorkflowBuildsWidget";
 import { WorkflowBuildsAdapter } from "./workflow-builds/workflowBuildsAdapter";
 
-function registerWidget(
-  registry: WidgetRegistry,
-  name: string,
-  component: any,
-  adapter: any,
-  validator: (config: any) => boolean,
-  defaultWidth: number,
-  defaultHeight: number
-) {
-  registry.registerWidget(name, {
-    component,
-    adapter,
-    validator,
-    defaultWidth,
-    defaultHeight,
-  });
-}
-
 export function setupWidgetRegistry(): WidgetRegistry {
+  console.log("Setting up widget registry..."); // Debug log
   const registry = new WidgetRegistry();
-  const milestoneValidator = new MilestoneValidator();
+
+  // Create validator instance
   const sprintValidator = new SprintValidator();
 
-  registerWidget(
-    registry,
-    "sprint",
-    SprintWidget,
-    new SprintAdapter(),
-    (config: any): boolean => sprintValidator.validate(config),
-    2,
-    1
-  );
+  // Default validator for widgets that don't need specific validation
+  const defaultValidator = () => true;
 
-  registerWidget(
-    registry,
-    "motivational",
-    MotivationalWidget,
-    new MotivationalAdapter(),
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (_config: any): boolean => true,
-    2,
-    1
-  );
+  // Register all widgets with their components and adapters
+  registry.registerWidget("sprint", {
+    component: SprintWidget,
+    adapter: new SprintAdapter(),
+    validator: (config: any) => sprintValidator.validate(config),
+    defaultWidth: 6,
+    defaultHeight: 2,
+  });
 
-  registerWidget(
-    registry,
-    "milestone",
-    MilestoneWidget,
-    new MilestoneAdapter(),
-    (config: any): boolean => milestoneValidator.validate(config),
-    2,
-    1
-  );
+  registry.registerWidget("motivational", {
+    component: MotivationalWidget,
+    adapter: new MotivationalAdapter(),
+    validator: defaultValidator,
+    defaultWidth: 6,
+    defaultHeight: 1,
+  });
 
-  registerWidget(
-    registry,
-    "issues-analytics",
-    IssuesAnalyticsWidget,
-    new IssuesAnalyticsAdapter(),
-    (config: any): boolean => {
-      if (!config?.owner || typeof config.owner !== "string") return false;
-      if (!config?.repo || typeof config.repo !== "string") return false;
-      if (
-        config.timeRange &&
-        !["week", "month", "quarter"].includes(config.timeRange)
-      )
-        return false;
-      return true;
-    },
-    6,
-    2
-  );
+  registry.registerWidget("milestone", {
+    component: MilestoneWidget,
+    adapter: new MilestoneAdapter(),
+    validator: (config: any) => milestoneValidator(config).isValid,
+    defaultWidth: 6,
+    defaultHeight: 2,
+  });
 
-  registerWidget(
-    registry,
-    "repo-health",
-    RepoHealthWidget,
-    new RepoHealthAdapter(),
-    (config: any): boolean => {
-      if (!config?.owner || typeof config.owner !== "string") return false;
-      if (!config?.repo || typeof config.repo !== "string") return false;
-      if (config.branch && typeof config.branch !== "string") return false;
-      return true;
-    },
-    6,
-    6 // Updated height to match the new requirement
-  );
+  registry.registerWidget("issues-analytics", {
+    component: IssuesAnalyticsWidget,
+    adapter: new IssuesAnalyticsAdapter(),
+    validator: defaultValidator,
+    defaultWidth: 6,
+    defaultHeight: 2,
+  });
 
-  registerWidget(
-    registry,
-    "workflow-builds",
-    WorkflowBuildsWidget,
-    new WorkflowBuildsAdapter(),
-    (config: any): boolean => {
-      if (!config?.owner || typeof config.owner !== "string") return false;
-      if (!config?.repo || typeof config.repo !== "string") return false;
-      if (config.branch && typeof config.branch !== "string") return false;
-      return true;
-    },
-    6,
-    4 // Height for workflow builds
-  );
+  registry.registerWidget("repo-health", {
+    component: RepoHealthWidget,
+    adapter: new RepoHealthAdapter(),
+    validator: defaultValidator,
+    defaultWidth: 6,
+    defaultHeight: 2,
+  });
 
+  registry.registerWidget("workflow-builds", {
+    component: WorkflowBuildsWidget,
+    adapter: new WorkflowBuildsAdapter(),
+    validator: defaultValidator,
+    defaultWidth: 6,
+    defaultHeight: 2,
+  });
+
+  console.log(
+    "Widget registry setup complete. Registered widgets:",
+    registry.getRegisteredWidgets()
+  ); // Debug log
   return registry;
 }

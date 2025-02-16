@@ -1,62 +1,45 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
+import { promises as fs } from "fs";
 import path from "path";
 import yaml from "js-yaml";
 import { DashboardConfig } from "@/app/types/dashboard";
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
-  const params = await context.params;
-  const { id } = params;
-
   try {
-    // Read the dashboard YAML file
-    const filePath = path.join(
+    console.log('Fetching dashboard with ID:', params.id);
+    
+    // Construct the path to the dashboard config file
+    const configPath = path.join(
       process.cwd(),
-      `app/dashboards-config/${id}.yml`
+      "app/dashboards-config",
+      `${params.id}.yml`
     );
 
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-      return new NextResponse(
-        JSON.stringify({ message: "Dashboard not found" }),
-        {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
+    console.log('Looking for config file at:', configPath);
 
-    const fileContents = fs.readFileSync(filePath, "utf8");
-    const config = yaml.load(fileContents) as DashboardConfig;
+    // Read and parse the YAML file
+    const fileContents = await fs.readFile(configPath, "utf8");
+    console.log('Raw file contents:', fileContents);
 
-    if (!config) {
-      return new NextResponse(
-        JSON.stringify({ message: "Invalid dashboard configuration" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+    const dashboardConfig = yaml.load(fileContents) as DashboardConfig;
+    console.log('Parsed dashboard config:', dashboardConfig);
+
+    if (!dashboardConfig) {
+      throw new Error("Invalid dashboard configuration");
     }
 
     // Add the id to the config
-    config.id = id;
+    dashboardConfig.id = params.id;
 
-    return new NextResponse(JSON.stringify(config), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(dashboardConfig);
   } catch (error) {
     console.error("Error loading dashboard:", error);
-    return new NextResponse(
-      JSON.stringify({ message: "Failed to load dashboard" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
+    return NextResponse.json(
+      { error: "Failed to load dashboard configuration" },
+      { status: 500 }
     );
   }
 }

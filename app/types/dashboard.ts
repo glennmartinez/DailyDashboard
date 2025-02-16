@@ -1,9 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Widget {
+  id: string;
   type: string;
-  width: number;
-  height?: number;
+  title?: string;
   config: Record<string, any>;
+  position: {
+    row: number;
+    col: number;
+    width?: number;
+    height?: number;
+  };
 }
 
 export interface NestedRow {
@@ -19,12 +25,6 @@ export interface Row {
 }
 
 export interface Dashboard {
-  name: string;
-  description: string;
-  rows: Row[];
-}
-
-export interface DashboardConfig {
   id?: string;
   title: string;
   description?: string;
@@ -32,16 +32,15 @@ export interface DashboardConfig {
     rows: number;
     columns: number;
   };
-  widgets: {
-    id: string;
-    type: string;
-    title?: string;
-    position: {
-      row: number;
-      col: number;
-      width?: number;
-      height?: number;
-    };
-    config?: Record<string, any>;
-  }[];
+  widgets: Widget[];
+}
+
+// Make DashboardConfig identical to Dashboard to avoid conversion
+export type DashboardConfig = Dashboard;
+
+export interface WidgetConfig {
+  id: string;
+  type: string;
+  title?: string;
+  config?: Record<string, any>;
 }

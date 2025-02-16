@@ -1,18 +1,27 @@
- import { MilestoneWidgetConfig } from "./types";
+import { MilestoneWidgetConfig } from "./types";
 
 export interface MilestoneValidationResult {
   isValid: boolean;
   errors: string[];
 }
 
-export interface MilestoneConfig {
-  projectNumber: number;
-}
-
 export function milestoneValidator(
-  config: MilestoneConfig
+  config: MilestoneWidgetConfig
 ): MilestoneValidationResult {
   const errors: string[] = [];
+
+  if (!config || typeof config !== "object") {
+    errors.push("Configuration must be an object");
+    return { isValid: false, errors };
+  }
+
+  if (!config.owner || typeof config.owner !== "string") {
+    errors.push("Owner must be a non-empty string");
+  }
+
+  if (!config.repo || typeof config.repo !== "string") {
+    errors.push("Repository must be a non-empty string");
+  }
 
   if (
     !config.projectNumber ||

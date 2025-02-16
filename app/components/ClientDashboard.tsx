@@ -10,7 +10,9 @@ interface ClientDashboardProps {
 }
 
 export function ClientDashboard({ dashboardData }: ClientDashboardProps) {
+  console.log("ClientDashboard received data:", dashboardData);
   const registry = setupWidgetRegistry();
+  console.log("Widget registry initialized:", registry);
 
   return (
     <WidgetRegistryProvider registry={registry}>

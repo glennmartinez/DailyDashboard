@@ -6,9 +6,6 @@
 import { DashboardConfig } from "../types/dashboard";
 import { WidgetRegistry } from "./widgetRegistry";
 
-// Define a maximum allowed row width (e.g. grid columns available)
-const MAX_ROW_WIDTH = 12;
-
 export class DashboardLoader {
   private widgetRegistry: WidgetRegistry;
 
@@ -133,12 +130,7 @@ export class DashboardLoader {
       }
 
       if (!widget.position) {
-        widget.position = { row: 0, col: 0 }; // Initialize with default row and col
-      }
-
-      // Use the widget's default width if it isn't specified
-      if (!widget.position.width) {
-        widget.position.width = widgetDef.defaultWidth;
+        widget.position = { row: 0, col: 0 };
       }
 
       // Validate widget configuration
@@ -172,7 +164,6 @@ export class DashboardLoader {
       return false;
     }
 
-    let totalRowWidth = 0;
     for (const widget of widgets) {
       const widgetDef = this.widgetRegistry.getWidget(widget.type);
       if (!widgetDef) {
@@ -181,11 +172,6 @@ export class DashboardLoader {
         );
         return false;
       }
-
-      if (typeof widget.width !== "number") {
-        widget.width = widgetDef.defaultWidth;
-      }
-      totalRowWidth += widget.width;
 
       try {
         if (widgetDef.validator) {
@@ -205,12 +191,6 @@ export class DashboardLoader {
       }
     }
 
-    if (totalRowWidth > MAX_ROW_WIDTH) {
-      console.error(
-        `Row in file ${fileName} exceeds maximum allowed width: ${totalRowWidth} > ${MAX_ROW_WIDTH}`
-      );
-      return false;
-    }
     return true;
   }
 
@@ -233,34 +213,15 @@ export class DashboardLoader {
   }
 
   private convertNestedConfigToFlat(config: any): DashboardConfig {
-    if (!config.rows) return config;
-
-    let currentRow = 0;
     const widgets = [];
+    let currentRow = 0;
 
-    for (const row of config.rows) {
-      if (Array.isArray(row.widgets)) {
-        let currentCol = 0;
-        for (const widget of row.widgets) {
-          if (widget.isNested && Array.isArray(widget.widgets)) {
-            // Handle nested widgets
-            for (const nestedWidget of widget.widgets) {
-              widgets.push({
-                id: `${widgets.length}`,
-                type: nestedWidget.type,
-                title: nestedWidget.title,
-                position: {
-                  row: currentRow,
-                  col: currentCol,
-                  width: nestedWidget.width,
-                  height: nestedWidget.height,
-                },
-                config: nestedWidget.config,
-              });
-              currentCol += nestedWidget.width;
-            }
-          } else {
-            // Handle regular widgets
+    // Handle row-based configuration
+    if (Array.isArray(config.widgets)) {
+      for (const item of config.widgets) {
+        if (item.row && Array.isArray(item.row)) {
+          let currentCol = 0;
+          for (const widget of item.row) {
             widgets.push({
               id: `${widgets.length}`,
               type: widget.type,
@@ -268,16 +229,14 @@ export class DashboardLoader {
               position: {
                 row: currentRow,
                 col: currentCol,
-                width: widget.width,
-                height: widget.height || row.height,
               },
               config: widget.config,
             });
-            currentCol += widget.width;
+            currentCol += 1;
           }
+          currentRow += 1;
         }
       }
-      currentRow++;
     }
 
     return {
@@ -285,7 +244,7 @@ export class DashboardLoader {
       title: config.name,
       description: config.description,
       layout: {
-        rows: config.rows.length,
+        rows: currentRow,
         columns: 12,
       },
       widgets,
@@ -294,12 +253,52 @@ export class DashboardLoader {
 
   async loadDashboardConfig(path: string): Promise<DashboardConfig | null> {
     try {
+      console.log("Loading dashboard config for path:", path); // Debug log
       const response = await fetch(`/api/dashboard/${path}`);
       if (!response.ok) {
         throw new Error("Failed to load dashboard configuration");
       }
       const rawConfig = await response.json();
-      const config = this.convertNestedConfigToFlat(rawConfig);
+      console.log("Raw config received:", rawConfig); // Debug log
+
+      // Ensure widgets array exists
+      if (!rawConfig.widgets || !Array.isArray(rawConfig.widgets)) {
+        console.error(
+          "Invalid dashboard config: missing or invalid widgets array"
+        );
+        return null;
+      }
+
+      const config: DashboardConfig = {
+        id: rawConfig.id || path,
+        title: rawConfig.name,
+        description: rawConfig.description,
+        layout: {
+          rows:
+            Math.max(...rawConfig.widgets.map((w: any) => w.position.row)) + 1,
+          columns: 12,
+        },
+        widgets: rawConfig.widgets.map((widget: any) => ({
+          id: widget.id,
+          type: widget.type,
+          title: widget.title,
+          position: {
+            row: widget.position.row || 0,
+            col: widget.position.col || 0,
+            width:
+              widget.position.width ||
+              this.widgetRegistry.getWidget(widget.type)?.defaultWidth ||
+              6,
+            height:
+              widget.position.height ||
+              this.widgetRegistry.getWidget(widget.type)?.defaultHeight ||
+              1,
+          },
+          config: widget.config || {},
+        })),
+      };
+
+      console.log("Processed config:", config); // Debug log
       return this.validateDashboardConfig(config, path) ? config : null;
     } catch (error) {
       console.error("Error loading dashboard configuration:", error);

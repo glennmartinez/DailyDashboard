@@ -10,4 +10,8 @@ export class WidgetRegistry {
   getWidget(type: string): WidgetDefinition | undefined {
     return this.widgets.get(type);
   }
+
+  getRegisteredWidgets(): string[] {
+    return Array.from(this.widgets.keys());
+  }
 }

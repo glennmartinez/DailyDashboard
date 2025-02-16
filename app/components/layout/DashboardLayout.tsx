@@ -8,7 +8,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, className }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-zinc-900 p-4">
-      <div className={cn("max-w-[2000px] mx-auto space-y-1", className)}>
+      <div className={cn("max-w-[2000px] mx-auto flex flex-col gap-4", className)}>
         {children}
       </div>
     </div>
@@ -17,16 +17,16 @@ export function DashboardLayout({ children, className }: DashboardLayoutProps) {
 
 export function DashboardRow({
   children,
-  height,
+  height = 1,
   className,
 }: {
   children: React.ReactNode;
-  height: number;
+  height?: number;
   className?: string;
 }) {
   return (
     <div
-      className={cn("grid grid-cols-12 gap-1", className)}
+      className={cn("grid grid-cols-12 gap-4", className)}
       style={{
         minHeight: `${height * 6}vh`,
       }}
@@ -38,16 +38,16 @@ export function DashboardRow({
 
 export function DashboardWidget({
   children,
-  width,
+  width = 6,
   className,
 }: {
   children: React.ReactNode;
-  width: number;
+  width?: number;
   className?: string;
 }) {
   return (
     <div
-      className={cn("min-h-[150px]", className)}
+      className={cn("rounded-lg bg-zinc-800 p-4 min-h-[150px]", className)}
       style={{
         gridColumn: `span ${width}`,
       }}

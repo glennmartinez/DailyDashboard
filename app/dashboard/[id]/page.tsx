@@ -4,72 +4,62 @@ import { DashboardLoader } from "../../services/dashboardLoader";
 import { ClientDashboard } from "../../components/ClientDashboard";
 import { setupWidgetRegistry } from "../../widgets/widgets-registry";
 import { Suspense, useEffect, useState } from "react";
-import { Dashboard } from "@/app/types/dashboard";
+import { DashboardConfig } from "@/app/types/dashboard";
 import { useParams } from "next/navigation";
+import { LoadingSpinner } from "../../components/ui/loading";
 
-const DashboardPage = () => {
+export default function DashboardPage() {
   const params = useParams();
   const id = params.id as string;
-
-  const [dashboardConfig, setDashboardConfig] = useState<Dashboard | null>(
-    null
-  );
+  const [dashboardConfig, setDashboardConfig] =
+    useState<DashboardConfig | null>(null);
   const [error, setError] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const registry = setupWidgetRegistry();
-    const loader = DashboardLoader.create(registry);
-
     const loadDashboard = async () => {
-      if (!id) return;
+      try {
+        setLoading(true);
+        const registry = setupWidgetRegistry();
+        const loader = DashboardLoader.create(registry);
 
-      const config = await loader.loadDashboardConfig(id);
-      if (!config || !loader.validateDashboard(config)) {
+        console.log("Loading dashboard with ID:", id);
+        if (!id) {
+          throw new Error("No dashboard ID provided");
+        }
+
+        const config = await loader.loadDashboardConfig(id);
+        console.log("Loaded dashboard config:", config);
+
+        if (!config || !loader.validateDashboard(config)) {
+          setError(true);
+          return;
+        }
+
+        console.log("Setting dashboard config:", config);
+        setDashboardConfig(config);
+      } catch (err) {
+        console.error("Error loading dashboard:", err);
         setError(true);
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      const dashboard: Dashboard = {
-        name: config.title,
-        description: config.description || "",
-        rows: [
-          {
-            height: config.layout?.rows || 1,
-            widgets: config.widgets.map((w) => ({
-              type: w.type,
-              width: w.position.width || 1,
-              height: w.position.height,
-              config: w.config || {},
-            })),
-          },
-        ],
-      };
-
-      setDashboardConfig(dashboard);
     };
 
     loadDashboard();
   }, [id]);
 
-  if (error) {
-    return (
-      <div className="text-red-500 p-4">
-        Error: Invalid dashboard configuration
-      </div>
-    );
+  if (loading) {
+    return <LoadingSpinner />;
   }
 
-  if (!dashboardConfig) {
-    return <div className="text-zinc-500 p-4">Loading dashboard...</div>;
+  if (error || !dashboardConfig) {
+    return <div className="text-red-500">Error loading dashboard</div>;
   }
 
   return (
-    <Suspense
-      fallback={<div className="text-zinc-500 p-4">Loading dashboard...</div>}
-    >
+    <Suspense fallback={<LoadingSpinner />}>
       <ClientDashboard dashboardData={dashboardConfig} />
     </Suspense>
   );
-};
-
-export default DashboardPage;
+}
