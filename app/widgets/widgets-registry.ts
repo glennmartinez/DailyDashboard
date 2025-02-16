@@ -14,6 +14,8 @@ import { RepoHealthWidget } from "./repo-health/RepoHealthWidget";
 import { RepoHealthAdapter } from "./repo-health/repoHealthAdapter";
 import { WorkflowBuildsWidget } from "./workflow-builds/WorkflowBuildsWidget";
 import { WorkflowBuildsAdapter } from "./workflow-builds/workflowBuildsAdapter";
+import { TimeWidget } from "./time/TimeWidget";
+import { TimeAdapter } from "./time/timeAdapter";
 
 export function setupWidgetRegistry(): WidgetRegistry {
   console.log("Setting up widget registry..."); // Debug log
@@ -72,6 +74,15 @@ export function setupWidgetRegistry(): WidgetRegistry {
     validator: defaultValidator,
     defaultWidth: 6,
     defaultHeight: 2,
+  });
+
+  // Register the new time widget
+  registry.registerWidget("time", {
+    component: TimeWidget,
+    adapter: new TimeAdapter(),
+    validator: defaultValidator,
+    defaultWidth: 4,  // As requested
+    defaultHeight: 2, // As requested
   });
 
   console.log(

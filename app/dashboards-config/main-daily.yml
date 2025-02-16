@@ -7,18 +7,25 @@ widgets:
     position:
       row: 0
       col: 6
-      width: 6
+      width: 4
     config: {}
   - id: "milestone1"
     type: "milestone"
     position:
       row: 0
       col: 0
-      width: 6
+      width: 5
     config:
       owner: "glennmartinez"
       repo: "habito-mobile"
       projectNumber: 1
+  - id: "time1"
+    type: "time"
+    position:
+      row: 0 # Adjust row as needed
+      col: 0 # Adjust column as needed
+      width: 3 # Using our configured default width
+    config: {} # No configu
   - id: "sprint1"
     type: "sprint"
     position:
