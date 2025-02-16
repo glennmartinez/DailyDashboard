@@ -47,7 +47,7 @@ export function IssuesAnalyticsWidget({
 
   if (loading) {
     return (
-      <div className="bg-black rounded-sm p-4">
+      <div className="bg-black rounded-sm p-4 h-full">
         <div className="text-zinc-500">Loading issues analytics...</div>
       </div>
     );

@@ -36,7 +36,7 @@ export function SprintWidget({
 
   return (
     <div
-      className=" bg-black rounded-sm p-4"
+      className=" bg-black rounded-sm p-4 h-full"
       style={{ gridColumn: `span ${width}`, gridRow: `span ${height}` }}
     >
       <h2 className="text-lg font-bold mb-4 text-zinc-200">SPRINT STATUS</h2>

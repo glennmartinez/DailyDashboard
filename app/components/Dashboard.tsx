@@ -22,7 +22,7 @@ export function Dashboard({ dashboard }: { dashboard: DashboardConfig }) {
   console.log("Rows map:", Array.from(rows.entries())); // Debug log
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col pt-2 pb-2">
       {Array.from(rows.entries())
         .sort(([a], [b]) => a - b) // Sort by row index
         .map(([rowIndex, rowWidgets]) => {
