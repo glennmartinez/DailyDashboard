@@ -64,3 +64,13 @@ widgets:
     config:
       owner: "glennmartinez"
       repo: "habito-mobile"
+  - id: "tree-coverage1"
+    type: "tree-coverage"
+    position:
+      row: 3
+      col: 0
+      width: 12 # Full width for better table display
+    config:
+      owner: "glennmartinez"
+      repo: "habito-mobile"
+      branch: "main" # Optional, defaults to 'main' if not specified

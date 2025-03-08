@@ -105,3 +105,22 @@ widgets:
       branch:
         type: "string"
         required: false
+
+  tree-coverage:
+    type: "tree-coverage"
+    defaultWidth: 6
+    defaultHeight: 3
+    component: "TreeCoverageWidget"
+    validationRules:
+      owner:
+        type: "string"
+        required: true
+      repo:
+        type: "string"
+        required: true
+      branch:
+        type: "string"
+        required: false
+      depth:
+        type: "number"
+        required: false

@@ -16,6 +16,8 @@ import { WorkflowBuildsWidget } from "./workflow-builds/WorkflowBuildsWidget";
 import { WorkflowBuildsAdapter } from "./workflow-builds/workflowBuildsAdapter";
 import { TimeWidget } from "./time/TimeWidget";
 import { TimeAdapter } from "./time/timeAdapter";
+import { TreeCoverageWidget } from "./tree-coverage/TreeCoverageWidget";
+import { TreeCoverageAdapter } from "./tree-coverage/treeCoverageAdapter";
 
 export function setupWidgetRegistry(): WidgetRegistry {
   console.log("Setting up widget registry..."); // Debug log
@@ -81,8 +83,17 @@ export function setupWidgetRegistry(): WidgetRegistry {
     component: TimeWidget,
     adapter: new TimeAdapter(),
     validator: defaultValidator,
-    defaultWidth: 4,  // As requested
+    defaultWidth: 4, // As requested
     defaultHeight: 2, // As requested
+  });
+
+  // Register the new tree coverage widget
+  registry.registerWidget("tree-coverage", {
+    component: TreeCoverageWidget,
+    adapter: new TreeCoverageAdapter(),
+    validator: defaultValidator,
+    defaultWidth: 6, // Full width for table readability
+    defaultHeight: 3, // Taller height to accommodate the table rows
   });
 
   console.log(
