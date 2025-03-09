@@ -56,7 +56,7 @@ export class SerpentineChartAdapter
       const recordsForCategory = 5 + Math.floor(Math.random() * 2); // 5 to 6 records per category
 
       for (let i = 0; i < recordsForCategory; i++) {
-        const duration = getRandomDays(2, 14); // 2 days to 2 weeks
+        const duration = getRandomDays(4, 14); // 2 days to 2 weeks
 
         if (currentDate < endDate) {
           const startDateStr = formatDate(currentDate);

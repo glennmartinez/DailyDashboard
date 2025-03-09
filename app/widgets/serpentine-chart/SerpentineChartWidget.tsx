@@ -160,6 +160,14 @@ export function SerpentineChartWidget({
     );
     dateAxis.tooltip.label.paddingTop = 7;
 
+    // Set default time range to show last month of data
+    const dates = chartData.map((item) => new Date(item.start).getTime());
+    const maxDate = new Date(Math.max(...dates));
+    const minDate = new Date(maxDate);
+    minDate.setMonth(minDate.getMonth() - 1);
+    dateAxis.min = minDate.getTime();
+    dateAxis.max = maxDate.getTime();
+
     // Style axis labels
     const labelTemplate = dateAxis.renderer.labels.template;
     labelTemplate.verticalCenter = "middle";
@@ -186,17 +194,17 @@ export function SerpentineChartWidget({
     series.columns.template.strokeOpacity = 0;
 
     // Add bullets
-    const bullet = series.bullets.push(new am4charts.CircleBullet());
-    bullet.circle.radius = 3;
-    bullet.circle.strokeOpacity = 0;
-    bullet.propertyFields.fill = "color";
-    bullet.locationX = 0;
+    // const bullet = series.bullets.push(new am4charts.CircleBullet());
+    // bullet.circle.radius = 3;
+    // bullet.circle.strokeOpacity = 0;
+    // bullet.propertyFields.fill = "color";
+    // bullet.locationX = 0;
 
-    const bullet2 = series.bullets.push(new am4charts.CircleBullet());
-    bullet2.circle.radius = 3;
-    bullet2.circle.strokeOpacity = 0;
-    bullet2.propertyFields.fill = "color";
-    bullet2.locationX = 1;
+    // const bullet2 = series.bullets.push(new am4charts.CircleBullet());
+    // bullet2.circle.radius = 3;
+    // bullet2.circle.strokeOpacity = 0;
+    // bullet2.propertyFields.fill = "color";
+    // bullet2.locationX = 1;
 
     // Add event series for hotfixes
     const eventSeries = chart.series.push(
@@ -262,7 +270,6 @@ export function SerpentineChartWidget({
     bottomLegend.labels.template.fill = am4core.color("#FFFFFF");
     bottomLegend.labels.template.fontSize = 12;
     bottomLegend.useDefaultMarker = true;
-    bottomLegend.background.fill = am4core.color("#222222");
     bottomLegend.background.fillOpacity = 0.5;
 
     // Create data for the legend
@@ -273,11 +280,22 @@ export function SerpentineChartWidget({
 
     bottomLegend.data = legendData;
 
-    // Add scrollbar
+    // Add scrollbar with default one month range
     chart.scrollbarX = new am4core.Scrollbar();
     chart.scrollbarX.align = "center";
     chart.scrollbarX.width = am4core.percent(85);
-    chart.scrollbarX.marginBottom = 40; // Add margin for the bottom legend
+    chart.scrollbarX.marginBottom = 40;
+
+    // Calculate default scrollbar position to show last month
+    const totalTime = maxDate.getTime() - Math.min(...dates);
+    const oneMonthTime = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+    const scrollStart = 1 - oneMonthTime / totalTime;
+
+    // Set scrollbar position and zoom behavior
+    chart.scrollbarX.start = scrollStart;
+    chart.scrollbarX.end = 1;
+    dateAxis.minZoomCount = 5; // Minimum number of days to show
+    dateAxis.maxZoomCount = 90; // Maximum zoom out to 90 days
 
     // Add cursor
     const cursor = new am4plugins_timeline.CurveCursor();
