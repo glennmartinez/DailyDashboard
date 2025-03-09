@@ -7,6 +7,7 @@ import { SerpentineChartWidgetConfig, SerpentineChartData } from "./types";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import * as am4plugins_timeline from "@amcharts/amcharts4/plugins/timeline";
+import * as am4plugins_bullets from "@amcharts/amcharts4/plugins/bullets";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 import am4themes_dark from "@amcharts/amcharts4/themes/dark";
 
@@ -123,10 +124,13 @@ export function SerpentineChartWidget({
     chart.fontSize = 11;
 
     // Create category axis
-    const categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
-    const categoryRenderer = new am4plugins_timeline.AxisRendererCurveY();
-    categoryAxis.renderer = categoryRenderer;
-    categoryAxis.dataFields.category = "category";
+    const categoryAxis = chart.yAxes.push(
+      new am4charts.CategoryAxis<am4plugins_timeline.AxisRendererCurveY>()
+    );
+    categoryAxis.renderer = new am4plugins_timeline.AxisRendererCurveY();
+    (
+      categoryAxis as unknown as { dataFields: { category: string } }
+    ).dataFields = { category: "category" };
     categoryAxis.cursorTooltipEnabled = false;
     categoryAxis.renderer.grid.template.disabled = true;
     categoryAxis.renderer.labels.template.paddingRight = 25;
@@ -135,11 +139,16 @@ export function SerpentineChartWidget({
     categoryAxis.renderer.radius = 60;
 
     // Create date axis
-    const dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-    const dateRenderer = new am4plugins_timeline.AxisRendererCurveX();
-    dateAxis.renderer = dateRenderer;
+    const dateAxis = chart.xAxes.push(
+      new am4charts.DateAxis<am4plugins_timeline.AxisRendererCurveX>()
+    );
+    dateAxis.renderer = new am4plugins_timeline.AxisRendererCurveX();
     dateAxis.renderer.minGridDistance = 70;
-    dateAxis.baseInterval = { count: 1, timeUnit: "day" };
+    (
+      dateAxis as unknown as {
+        baseInterval: { count: number; timeUnit: string };
+      }
+    ).baseInterval = { count: 1, timeUnit: "day" };
     dateAxis.renderer.tooltipLocation = 0;
     dateAxis.startLocation = -0.5;
     dateAxis.renderer.line.strokeDasharray = "1,4";
@@ -224,27 +233,19 @@ export function SerpentineChartWidget({
     eventSeries.strokeOpacity = 0;
 
     // Style the event markers
-    const eventBullet = eventSeries.bullets.push(new am4charts.CircleBullet());
-    eventBullet.circle.radius = 6;
-    eventBullet.circle.fill = am4core.color("#FF0000");
-    eventBullet.circle.strokeWidth = 2;
-    eventBullet.circle.strokeOpacity = 1;
+    const flagBullet = eventSeries.bullets.push(
+      new am4plugins_bullets.FlagBullet()
+    );
+    flagBullet.label.propertyFields.text = "letter";
+    flagBullet.locationX = 0;
+    flagBullet.tooltipText = "{description}";
+    flagBullet.label.fontSize = 10;
+    flagBullet.label.fill = am4core.color("#FFFFFF");
+    flagBullet.pole.stroke = am4core.color("#FF0000");
+    flagBullet.pole.strokeWidth = 2;
+    flagBullet.background.fill = am4core.color("#FF0000");
 
-    // Add text label for "HotFix"
-    const labelBullet = eventSeries.bullets.push(new am4charts.LabelBullet());
-    labelBullet.label.text = "{letter}";
-    labelBullet.label.fontSize = 10;
-    labelBullet.label.dy = -15;
-    labelBullet.label.fill = am4core.color("#FFFFFF");
-
-    // Configure tooltip for hotfix markers
-    eventBullet.tooltipText = "Hotfix: [bold]{description}[/]";
-    const bulletTooltip = eventBullet.tooltip;
-    if (bulletTooltip) {
-      bulletTooltip.getFillFromObject = false;
-      bulletTooltip.background.fill = am4core.color("#000000");
-      bulletTooltip.label.fill = am4core.color("#FFFFFF");
-    }
+    // Remove the old text label bullet since we're using the flag's built-in label
 
     // Create bottom legend
     const bottomLegend = chart.createChild(am4charts.Legend);
