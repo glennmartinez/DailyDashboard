@@ -17,7 +17,13 @@ import { WorkflowBuildsAdapter } from "./workflow-builds/workflowBuildsAdapter";
 import { TimeWidget } from "./time/TimeWidget";
 import { TimeAdapter } from "./time/timeAdapter";
 import { TreeCoverageWidget } from "./tree-coverage/TreeCoverageWidget";
-import { TreeCoverageAdapter } from "./tree-coverage/treeCoverageAdapter";
+import { TreeCoverageAdapter } from "./tree-coverage/TreeCoverageAdapter";
+
+// Update serpentine chart imports to use the index.ts file
+import {
+  SerpentineChartWidget,
+  SerpentineChartAdapter,
+} from "./serpentine-chart";
 
 export function setupWidgetRegistry(): WidgetRegistry {
   console.log("Setting up widget registry..."); // Debug log
@@ -94,6 +100,16 @@ export function setupWidgetRegistry(): WidgetRegistry {
     validator: defaultValidator,
     defaultWidth: 6, // Full width for table readability
     defaultHeight: 3, // Taller height to accommodate the table rows
+  });
+
+  // Register the serpentine chart widget with updated height
+  console.log("Registering serpentine-chart widget...");
+  registry.registerWidget("serpentine-chart", {
+    component: SerpentineChartWidget,
+    adapter: new SerpentineChartAdapter(),
+    validator: defaultValidator,
+    defaultWidth: 12, // Full width for better visualization
+    defaultHeight: 6, // Updated height from 3 to 6
   });
 
   console.log(
