@@ -95,12 +95,8 @@ export function SerpentineChartWidget({
 
     // Prepare chart data
     const chartData = data.dataPoints.map((point) => {
-      // Calculate end date as 1 day after start for visualization purposes
-      const endDate = new Date(point.date);
-      endDate.setDate(endDate.getDate() + 1);
-
       const category = point.category.split(" (")[0];
-
+      
       if (!categoryColors[category]) {
         categoryColors[category] =
           point.color ||
@@ -109,8 +105,8 @@ export function SerpentineChartWidget({
 
       return {
         category: category,
-        start: point.date.toISOString().split("T")[0],
-        end: endDate.toISOString().split("T")[0],
+        start: point.startDate,
+        end: point.endDate,
         color: categoryColors[category],
         task: category,
       };
@@ -160,13 +156,32 @@ export function SerpentineChartWidget({
     );
     dateAxis.tooltip.label.paddingTop = 7;
 
-    // Set default time range to show last month of data
-    const dates = chartData.map((item) => new Date(item.start).getTime());
+    // Set default time range and scrollbar
+    const dates = chartData.map(item => new Date(item.start || "").getTime()).filter(Boolean);
     const maxDate = new Date(Math.max(...dates));
     const minDate = new Date(maxDate);
     minDate.setMonth(minDate.getMonth() - 1);
+    
+    // Set axis range
     dateAxis.min = minDate.getTime();
     dateAxis.max = maxDate.getTime();
+
+    // Add scrollbar with default one month range
+    chart.scrollbarX = new am4core.Scrollbar();
+    chart.scrollbarX.align = "center";
+    chart.scrollbarX.width = am4core.percent(85);
+    chart.scrollbarX.marginBottom = 40;
+
+    // Calculate scrollbar position to show last month
+    const totalTime = maxDate.getTime() - Math.min(...dates);
+    const oneMonthTime = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+    const scrollStart = Math.max(0, 1 - (oneMonthTime / totalTime));
+    chart.scrollbarX.start = scrollStart;
+    chart.scrollbarX.end = 1;
+
+    // Adjust zoom limits based on task durations
+    dateAxis.minZoomCount = 5; // Show at least 5 days
+    dateAxis.maxZoomCount = 90; // Maximum zoom out to 90 days
 
     // Style axis labels
     const labelTemplate = dateAxis.renderer.labels.template;
@@ -279,23 +294,6 @@ export function SerpentineChartWidget({
     }));
 
     bottomLegend.data = legendData;
-
-    // Add scrollbar with default one month range
-    chart.scrollbarX = new am4core.Scrollbar();
-    chart.scrollbarX.align = "center";
-    chart.scrollbarX.width = am4core.percent(85);
-    chart.scrollbarX.marginBottom = 40;
-
-    // Calculate default scrollbar position to show last month
-    const totalTime = maxDate.getTime() - Math.min(...dates);
-    const oneMonthTime = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
-    const scrollStart = 1 - oneMonthTime / totalTime;
-
-    // Set scrollbar position and zoom behavior
-    chart.scrollbarX.start = scrollStart;
-    chart.scrollbarX.end = 1;
-    dateAxis.minZoomCount = 5; // Minimum number of days to show
-    dateAxis.maxZoomCount = 90; // Maximum zoom out to 90 days
 
     // Add cursor
     const cursor = new am4plugins_timeline.CurveCursor();

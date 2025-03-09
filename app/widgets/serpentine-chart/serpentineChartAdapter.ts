@@ -56,24 +56,25 @@ export class SerpentineChartAdapter
       const recordsForCategory = 5 + Math.floor(Math.random() * 2); // 5 to 6 records per category
 
       for (let i = 0; i < recordsForCategory; i++) {
-        const duration = getRandomDays(4, 14); // 2 days to 2 weeks
+        const duration = getRandomDays(5, 14); // Duration for gap between tasks
+        const taskDuration = getRandomDays(1, 4); // Task duration between 1-4 days
 
         if (currentDate < endDate) {
           const startDateStr = formatDate(currentDate);
-          const endDateObj = addDays(currentDate, duration);
+          const endDateObj = addDays(currentDate, taskDuration); // Use taskDuration for the task length
 
           sampleData.push({
             category: category,
-            value: duration,
+            value: taskDuration,
             color: colors[index],
-            date: new Date(currentDate),
+            date: new Date(currentDate), // Keep date for sorting
             task: `v${(1 + Math.random() * 4).toFixed(2)}`, // Random version between v1.00 and v5.00
             startDate: startDateStr,
-            endDate: formatDate(endDateObj),
+            endDate: formatDate(endDateObj)
           });
 
-          // Add a gap between tasks (1-5 days)
-          currentDate = addDays(endDateObj, getRandomDays(1, 5));
+          // Move to next date with gap (using duration for gap)
+          currentDate = addDays(endDateObj, duration);
         }
       }
     });

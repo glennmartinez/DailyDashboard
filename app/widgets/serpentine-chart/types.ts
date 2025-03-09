@@ -13,9 +13,9 @@ export interface DataPoint {
   color?: string;
   date?: Date;
   formattedDate?: string;
-  task?: string; // Added task field for version numbers
-  startDate?: string; // Added for explicit start date
-  endDate?: string; // Added for explicit end date
+  task?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface SerpentineChartData {
