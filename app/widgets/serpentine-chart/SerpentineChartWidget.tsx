@@ -96,7 +96,7 @@ export function SerpentineChartWidget({
     // Prepare chart data
     const chartData = data.dataPoints.map((point) => {
       const category = point.category.split(" (")[0];
-      
+
       if (!categoryColors[category]) {
         categoryColors[category] =
           point.color ||
@@ -157,11 +157,13 @@ export function SerpentineChartWidget({
     dateAxis.tooltip.label.paddingTop = 7;
 
     // Set default time range and scrollbar
-    const dates = chartData.map(item => new Date(item.start || "").getTime()).filter(Boolean);
+    const dates = chartData
+      .map((item) => new Date(item.start || "").getTime())
+      .filter(Boolean);
     const maxDate = new Date(Math.max(...dates));
     const minDate = new Date(maxDate);
     minDate.setMonth(minDate.getMonth() - 1);
-    
+
     // Set axis range
     dateAxis.min = minDate.getTime();
     dateAxis.max = maxDate.getTime();
@@ -175,7 +177,7 @@ export function SerpentineChartWidget({
     // Calculate scrollbar position to show last month
     const totalTime = maxDate.getTime() - Math.min(...dates);
     const oneMonthTime = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
-    const scrollStart = Math.max(0, 1 - (oneMonthTime / totalTime));
+    const scrollStart = Math.max(0, 1 - oneMonthTime / totalTime);
     chart.scrollbarX.start = scrollStart;
     chart.scrollbarX.end = 1;
 
