@@ -1,0 +1,13 @@
+File: app/dashboards/main-daily.yml
+name: "Timeline Build"
+description: "Timeline Builds"
+widgets:
+  - id: "release-timeline-1"
+    type: "release-timeline"
+    position:
+      row: 0
+      col: 0
+      width: 12
+    config:
+      owner: "glennmartin"
+      repo: "glabs-dash-nextjs"

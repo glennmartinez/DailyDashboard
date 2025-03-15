@@ -134,3 +134,19 @@ widgets:
       title:
         type: "string"
         required: false
+
+  release-timeline:
+    type: "release-timeline"
+    defaultWidth: 12
+    defaultHeight: 4
+    component: "ReleaseTimelineWidget"
+    validationRules:
+      title:
+        type: "string"
+        required: false
+      owner:
+        type: "string"
+        required: false
+      repo:
+        type: "string"
+        required: false

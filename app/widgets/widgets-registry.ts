@@ -25,6 +25,13 @@ import {
   SerpentineChartAdapter,
 } from "./serpentine-chart";
 
+// Import the new release timeline widget
+import {
+  ReleaseTimelineWidget,
+  ReleaseTimelineAdapter,
+  releaseTimelineValidator,
+} from "./release-timeline";
+
 export function setupWidgetRegistry(): WidgetRegistry {
   console.log("Setting up widget registry..."); // Debug log
   const registry = new WidgetRegistry();
@@ -110,6 +117,15 @@ export function setupWidgetRegistry(): WidgetRegistry {
     validator: defaultValidator,
     defaultWidth: 12, // Full width for better visualization
     defaultHeight: 6, // Updated height from 3 to 6
+  });
+
+  // Register the new release timeline widget
+  registry.registerWidget("release-timeline", {
+    component: ReleaseTimelineWidget,
+    adapter: new ReleaseTimelineAdapter(),
+    validator: (config: any) => releaseTimelineValidator(config).isValid,
+    defaultWidth: 12, // Full page width
+    defaultHeight: 4, // Reasonable height for the timeline
   });
 
   console.log(
