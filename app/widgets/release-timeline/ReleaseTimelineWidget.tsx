@@ -25,7 +25,7 @@ export function ReleaseTimelineWidget({ data }: WidgetProps<any>) {
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle className="">{title}</CardTitle>
           <CardDescription>
             Track and visualize project release timeline
           </CardDescription>
@@ -42,7 +42,7 @@ export function ReleaseTimelineWidget({ data }: WidgetProps<any>) {
   return (
     <Card className="w-full bg-white">
       <CardHeader>
-        <CardTitle className="text-slate-400">{title}</CardTitle>
+        <CardTitle className="text-slate-600 text-xl">{title}</CardTitle>
         <CardDescription>
           Track and visualize project release timeline
         </CardDescription>

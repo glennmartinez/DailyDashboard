@@ -204,10 +204,12 @@ export default function ScrollableTimeline({
   const spacing = getZoomSpacing();
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col w-full h-full p-6 border rounded-lg shadow-sm border-slate-300 ">
       {/* Fixed Header with zoom controls */}
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">Scrollable Timeline</h3>
+        <h3 className="text-lg font-medium text-slate-500">
+          Scrollable Timeline
+        </h3>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Zoom:</span>
           <Select
@@ -282,7 +284,7 @@ export default function ScrollableTimeline({
                       <h3
                         className={cn(
                           "font-medium",
-                          isSelected ? "" : "text-gray-500" // Grey out text if not selected
+                          isSelected ? "text-slate-900" : "text-gray-500" // Use dark text for selected items
                         )}
                       >
                         {release.name}
@@ -442,7 +444,10 @@ export default function ScrollableTimeline({
                       }}
                     >
                       <div className="flex items-center gap-2">
-                        <span>{release.name}</span>
+                        <span className="text-slate-500 ml-1">
+                          {release.name}
+                        </span>{" "}
+                        {/* Added ml-1 for left margin */}
                         <Badge
                           variant="outline"
                           className={`
