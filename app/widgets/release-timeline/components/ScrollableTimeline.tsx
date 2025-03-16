@@ -189,14 +189,18 @@ export default function ScrollableTimeline({
       case "expanded":
         return {
           releaseGap: "mb-0.3",
-          stepGap: "mb-0.3",
-          // Change from w-[calc(50%-4px)] to w-[calc(35%-4px)] (30% reduction)
-          stepWidth: "w-[calc(35%-4px)]",
+          stepGap: "mb-1", // Reduced vertical gap between steps
+          // Keep the same width as default
+          stepWidth: "w-[calc(35%-16px)]",
+          stepPosition: "ml-[15%]", // Keep same positioning as default
+          stepPositionReverse: "mr-[15%]", // Keep same positioning as default
           headerSize: "w-2 h-2",
           stepSize: "h-2 w-2",
           fontSize: "text-[0.6rem]",
+          cardHeight: "max-h-8", // Add specific height control
+          cardContentHeight: "max-h-6", // Inner content height
           showDescription: false,
-          cardPadding: "p-2",
+          cardPadding: "px-2 py-1", // Reduced vertical padding
           headerPadding: "p-0.6",
           headerTranslate: "-translate-y-3",
         };
@@ -213,37 +217,30 @@ export default function ScrollableTimeline({
           Scrollable Timeline
         </h3>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Zoom:</span>
-          <Select
-            value={zoomLevel}
-            onValueChange={(value) => setZoomLevel(value as ZoomLevel)}
-          >
-            <SelectTrigger className="h-8 w-[120px]">
-              <SelectValue placeholder="Select view" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="default">Default View</SelectItem>
-              <SelectItem value="expanded">Expanded View</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="flex">
+          <div className="flex border border-slate-400 rounded-md">
             <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-r-none"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 rounded-r-none border-0 bg-white hover:bg-white"
               onClick={() => setZoomLevel("default")}
-              disabled={zoomLevel === "default"}
             >
-              <ZoomIn className="h-4 w-4" />
+              <ZoomIn
+                className={`h-4 w-4 ${
+                  zoomLevel === "default" ? "text-slate-800" : "text-slate-400"
+                }`}
+              />
             </Button>
             <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-l-none border-l-0"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 rounded-l-none border-l border-slate-400 bg-white hover:bg-white"
               onClick={() => setZoomLevel("expanded")}
-              disabled={zoomLevel === "expanded"}
             >
-              <ZoomOut className="h-4 w-4" />
+              <ZoomOut
+                className={`h-4 w-4 ${
+                  zoomLevel === "expanded" ? "text-slate-800" : "text-slate-400"
+                }`}
+              />
             </Button>
           </div>
         </div>
@@ -545,6 +542,7 @@ export default function ScrollableTimeline({
                                 spacing.fontSize,
                                 "rounded-lg border border-slate-300 transition-all duration-300",
                                 spacing.cardPadding,
+                                spacing.cardHeight, // Apply the height constraint
                                 isSelected ? "shadow-sm" : "shadow-none",
                                 step.completed ? "bg-gray-50" : "bg-white",
                                 visibleReleases.has(release.id)
@@ -560,33 +558,66 @@ export default function ScrollableTimeline({
                                   : spacing.stepPositionReverse
                               )}
                             >
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <h4 className="font-medium text-sm text-slate-400">
-                                    {step.name}
-                                  </h4>
-                                  <p
-                                    className={cn(
-                                      zoomLevel === "expanded"
-                                        ? "text-[0.6rem]"
-                                        : "text-[0.65rem]",
-                                      "text-muted-foreground"
-                                    )}
-                                  >
-                                    {format(new Date(step.startDate), "MMM d")}{" "}
-                                    - {format(new Date(step.endDate), "MMM d")}
-                                  </p>
+                              <div
+                                className={cn(
+                                  "flex items-center justify-between", // Changed from items-start to items-center
+                                  spacing.cardContentHeight,
+                                  "overflow-hidden"
+                                )}
+                              >
+                                <div className="w-full mr-2">
+                                  {" "}
+                                  {/* Added margin-right for gap */}
+                                  {zoomLevel === "expanded" ? (
+                                    // Compact layout for expanded/zoomed-out view
+                                    <div className="flex justify-between items-center w-full">
+                                      <h4 className="font-medium text-slate-400 text-[0.65rem] truncate pr-1 max-w-[60%]">
+                                        {" "}
+                                        {/* Reduced max width */}
+                                        {step.name}
+                                      </h4>
+                                      <p className="text-[0.55rem] text-muted-foreground whitespace-nowrap">
+                                        {format(
+                                          new Date(step.startDate),
+                                          "MMM d"
+                                        )}
+                                        -
+                                        {format(
+                                          new Date(step.endDate),
+                                          "MMM d"
+                                        )}
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <h4 className="font-medium text-xs text-slate-400">
+                                        {step.name}
+                                      </h4>
+                                      <p className="text-[0.65rem] text-muted-foreground">
+                                        {format(
+                                          new Date(step.startDate),
+                                          "MMM d"
+                                        )}{" "}
+                                        -{" "}
+                                        {format(
+                                          new Date(step.endDate),
+                                          "MMM d"
+                                        )}
+                                      </p>
+                                    </>
+                                  )}
                                 </div>
                                 <Badge
                                   variant={
                                     step.completed ? "default" : "outline"
                                   }
                                   className={cn(
+                                    "flex-shrink-0", // Prevent badge from shrinking
                                     step.completed
                                       ? "bg-green-100 text-green-800 border-green-200"
                                       : "text-slate-400",
                                     zoomLevel === "expanded"
-                                      ? "text-[0.6rem] px-1 py-0"
+                                      ? "text-[0.5rem] px-1 py-0 h-3 min-w-fit whitespace-nowrap"
                                       : "text-[0.65rem] px-1.5 py-0"
                                   )}
                                 >
