@@ -174,29 +174,31 @@ export default function ScrollableTimeline({
     switch (zoomLevel) {
       case "default":
         return {
-          releaseGap: "mb-3", // Small gap to fit 3+ releases
+          releaseGap: "mb-3",
           stepGap: "mb-2",
-          stepWidth: "w-[calc(50%-16px)]",
-          headerSize: "w-4 h-4", // Small header dot
-          stepSize: "h-4 w-4", // Small step indicators
-          fontSize: "text-xs", // Small font size
-          showDescription: false, // Hide descriptions to save space
+          // Keep width the same but change how it's positioned
+          stepWidth: "w-[calc(35%-16px)]",
+          // Add new positioning values
+          stepPosition: "ml-[15%]", // For left side cards
+          stepPositionReverse: "mr-[15%]", // For right side cards
+          headerSize: "w-4 h-4",
           cardPadding: "p-2",
           headerPadding: "p-2",
           headerTranslate: "-translate-y-12",
         };
       case "expanded":
         return {
-          releaseGap: "mb-0.3", // Tiny gap for maximum compression
+          releaseGap: "mb-0.3",
           stepGap: "mb-0.3",
-          stepWidth: "w-[calc(50%-4px)]",
-          headerSize: "w-2 h-2", // Tiny header dot
-          stepSize: "h-2 w-2", // Tiny step indicators
-          fontSize: "text-[0.6rem]", // Tiny font size
-          showDescription: false, // Hide descriptions
-          cardPadding: "p-2", // Minimal padding
-          headerPadding: "p-0.6", // Minimal header padding
-          headerTranslate: "-translate-y-3", // Less space for header
+          // Change from w-[calc(50%-4px)] to w-[calc(35%-4px)] (30% reduction)
+          stepWidth: "w-[calc(35%-4px)]",
+          headerSize: "w-2 h-2",
+          stepSize: "h-2 w-2",
+          fontSize: "text-[0.6rem]",
+          showDescription: false,
+          cardPadding: "p-2",
+          headerPadding: "p-0.6",
+          headerTranslate: "-translate-y-3",
         };
     }
   };
@@ -506,8 +508,8 @@ export default function ScrollableTimeline({
                                   ? "left-[calc(50%+8px)]"
                                   : "right-[calc(50%+8px)]",
                                 zoomLevel === "expanded"
-                                  ? "w-[calc(50%-4px)]"
-                                  : "w-[calc(50%-8px)]"
+                                  ? "w-[calc(35%-8px)]" // Updated width to match the gap between center and cards
+                                  : "w-[calc(35%-8px)]" // Updated width to match the gap between center and cards
                               )}
                               style={{
                                 backgroundColor: step.completed
@@ -551,12 +553,16 @@ export default function ScrollableTimeline({
                                     : "-translate-x-0"
                                   : isEven
                                   ? "-translate-x-8"
-                                  : "translate-x-8"
+                                  : "translate-x-8",
+                                // Apply positioning classes based on which side the step is on
+                                isEven
+                                  ? spacing.stepPosition
+                                  : spacing.stepPositionReverse
                               )}
                             >
                               <div className="flex items-start justify-between">
                                 <div>
-                                  <h4 className="font-medium text-slate-400">
+                                  <h4 className="font-medium text-sm text-slate-400">
                                     {step.name}
                                   </h4>
                                   <p
