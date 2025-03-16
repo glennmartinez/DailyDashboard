@@ -35,54 +35,71 @@ export default function ScrollableTimeline({
   const timelineRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // Ensure we default to the current release
-  useEffect(() => {
-    // Find the current release
-    const currentRelease = releases.find((r) => r.status === "current");
+  // Add this flag to prevent scroll conflicts
+  const isManualScrolling = useRef(false);
 
-    // Set the selected release ID to the current release if available
-    if (currentRelease) {
-      setSelectedReleaseId(currentRelease.id);
+  // Create a centralized scroll function
+  const scrollToRelease = (releaseId: string) => {
+    if (!releaseId) return;
+
+    isManualScrolling.current = true;
+
+    // Find elements
+    const releaseElement = observerRefs.current.get(releaseId);
+    const sidebarItem = document.querySelector(
+      `[data-sidebar-id="${releaseId}"]`
+    );
+
+    // Scroll timeline
+    if (releaseElement && timelineRef.current) {
+      timelineRef.current.scrollTo({
+        top: releaseElement.offsetTop - 100,
+        behavior: "smooth",
+      });
     }
 
-    // This should run only once on component mount
-  }, [releases]);
+    // Scroll sidebar
+    if (sidebarItem && sidebarRef.current) {
+      sidebarRef.current.scrollTo({
+        top:
+          sidebarItem.offsetTop -
+          sidebarRef.current.clientHeight / 2 +
+          sidebarItem.clientHeight / 2,
+        behavior: "smooth",
+      });
+    }
 
-  // Add/modify this useEffect for initial scroll
+    // Reset the flag after scrolling completes
+    setTimeout(() => {
+      isManualScrolling.current = false;
+    }, 1000); // Covers typical scroll animation time
+  };
+
+  // Initial selection of current release
   useEffect(() => {
     // Find the current release
     const currentRelease = releases.find((r) => r.status === "current");
 
     if (currentRelease) {
-      // Set the selected release ID
       setSelectedReleaseId(currentRelease.id);
 
-      // Scroll to the current release after a delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        const currentReleaseElement = observerRefs.current.get(
-          currentRelease.id
-        );
-        if (currentReleaseElement && timelineRef.current) {
-          timelineRef.current.scrollTo({
-            top: currentReleaseElement.offsetTop - 100,
-            behavior: "smooth",
-          });
-        }
+      // Wait for refs to be populated
+      setTimeout(() => {
+        scrollToRelease(currentRelease.id);
       }, 100);
-
-      return () => clearTimeout(timer);
     }
-  }, [releases]); // Run only on initial load or when releases change
+  }, []); // Empty dependency array means this runs once on mount
 
   // Setup intersection observer to detect which releases are visible
   useEffect(() => {
     const options = {
       root: timelineRef.current,
       rootMargin: "0px",
-      threshold: 0.3, // When 30% of the item is visible
+      threshold: [0.3, 0.5, 0.7], // Multiple thresholds for better tracking
     };
 
     const observer = new IntersectionObserver((entries) => {
+      // Only update visibility markers, but don't scroll
       entries.forEach((entry) => {
         const id = entry.target.getAttribute("data-release-id");
         if (!id) return;
@@ -94,23 +111,9 @@ export default function ScrollableTimeline({
             return newSet;
           });
 
-          // Set as selected release when it's the most visible
+          // Update selected ID when releases pass through the center of the viewport
           if (entry.intersectionRatio > 0.5) {
             setSelectedReleaseId(id);
-
-            // Sync sidebar scroll position
-            const sidebarItem = document.querySelector(
-              `[data-sidebar-id="${id}"]`
-            );
-            if (sidebarItem && sidebarRef.current) {
-              sidebarRef.current.scrollTo({
-                top:
-                  sidebarItem.getBoundingClientRect().top +
-                  sidebarRef.current.scrollTop -
-                  100,
-                behavior: "smooth",
-              });
-            }
           }
         } else {
           setVisibleReleases((prev) => {
@@ -122,54 +125,36 @@ export default function ScrollableTimeline({
       });
     }, options);
 
-    // Observe all release elements
-    observerRefs.current.forEach((element) => {
-      observer.observe(element);
-    });
+    // Observe all release elements after they're rendered
+    const timer = setTimeout(() => {
+      observerRefs.current.forEach((element) => {
+        observer.observe(element);
+      });
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       observer.disconnect();
     };
   }, [releases]);
 
-  // Scroll to the current release initially
-  useEffect(() => {
-    const currentReleaseElement = observerRefs.current.get(
-      selectedReleaseId || ""
-    );
-    if (currentReleaseElement && timelineRef.current) {
-      timelineRef.current.scrollTo({
-        top: currentReleaseElement.offsetTop - 200,
-        behavior: "smooth",
-      });
-    }
-
-    // Sync sidebar scroll position
-    const sidebarItem = document.querySelector(
-      `[data-sidebar-id="${selectedReleaseId}"]`
-    );
-    if (sidebarItem && sidebarRef.current) {
-      sidebarRef.current.scrollTo({
-        top:
-          sidebarItem.getBoundingClientRect().top +
-          sidebarRef.current.scrollTop -
-          100,
-        behavior: "smooth",
-      });
-    }
-  }, [selectedReleaseId]);
-
-  // Add this useEffect to handle scrolling whenever selectedReleaseId changes
+  // Modified effect to handle scrolling the sidebar when selectedReleaseId changes
   useEffect(() => {
     if (!selectedReleaseId) return;
 
-    // Small timeout to ensure DOM has updated
+    // Don't scroll during manual interactions
     const timer = setTimeout(() => {
-      const releaseElement = observerRefs.current.get(selectedReleaseId);
-      if (releaseElement && timelineRef.current) {
-        timelineRef.current.scrollTo({
-          top: releaseElement.offsetTop - 200,
-          behavior: "smooth",
+      // Always update sidebar position when selection changes (whether manually or automatically)
+      const sidebarItem = document.querySelector(
+        `[data-sidebar-id="${selectedReleaseId}"]`
+      );
+      if (sidebarItem && sidebarRef.current) {
+        sidebarRef.current.scrollTo({
+          top:
+            sidebarItem.offsetTop -
+            sidebarRef.current.clientHeight / 2 +
+            sidebarItem.clientHeight / 2,
+          behavior: isManualScrolling.current ? "smooth" : "auto",
         });
       }
     }, 50);
@@ -177,11 +162,11 @@ export default function ScrollableTimeline({
     return () => clearTimeout(timer);
   }, [selectedReleaseId]);
 
-  // Sort releases by date
+  // Sort releases by date - change from newest first to oldest first
   const sortedReleases = [...releases].sort((a, b) => {
     const aStart = new Date(a.steps?.[0]?.startDate || a.date);
     const bStart = new Date(b.steps?.[0]?.startDate || b.date);
-    return bStart.getTime() - aStart.getTime(); // Newest first
+    return aStart.getTime() - bStart.getTime(); // Oldest first
   });
 
   // Get spacing based on zoom level
@@ -219,8 +204,8 @@ export default function ScrollableTimeline({
   const spacing = getZoomSpacing();
 
   return (
-    <div className="flex flex-col   w-full">
-      {/* Header with zoom controls */}
+    <div className="flex flex-col w-full h-full">
+      {/* Fixed Header with zoom controls */}
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-medium">Scrollable Timeline</h3>
         <div className="flex items-center gap-2">
@@ -260,13 +245,10 @@ export default function ScrollableTimeline({
         </div>
       </div>
 
+      {/* Content Area with Fixed Sidebar and Scrollable Timeline */}
       <div className="flex flex-1 w-full">
-        {/* Left sidebar with releases - make this fixed */}
-        <div className="w-[250px] flex-shrink-0 relative h-[calc(100vh-150px)] overflow-hidden">
-          {/* Gradient overlays for scroll indication */}
-          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
-
+        {/* Left sidebar with releases - fixed position */}
+        <div className="w-[250px] flex-shrink-0 h-[calc(100vh-200px)] overflow-hidden">
           <div ref={sidebarRef} className="h-full overflow-y-auto pr-4 pb-16">
             <div className="py-16 space-y-4">
               {sortedReleases.map((release) => {
@@ -289,25 +271,11 @@ export default function ScrollableTimeline({
                     )}
                     onClick={() => {
                       setSelectedReleaseId(release.id);
-
-                      // Force immediate scroll rather than waiting for effect
-                      requestAnimationFrame(() => {
-                        setTimeout(() => {
-                          const releaseElement = observerRefs.current.get(
-                            release.id
-                          );
-                          if (releaseElement && timelineRef.current) {
-                            timelineRef.current.scrollTo({
-                              top: releaseElement.offsetTop - 100, // Adjusted offset for better visibility
-                              behavior: "smooth",
-                            });
-                          }
-                        }, 10); // Small timeout for more reliable scrolling
-                      });
+                      scrollToRelease(release.id);
                     }}
                     style={{
                       borderLeftWidth: "4px",
-                      borderLeftColor: isSelected ? release.color : "#d1d5db", // Grey out if not selected
+                      borderLeftColor: isSelected ? release.color : "#d1d5db",
                     }}
                   >
                     <div className="flex items-center justify-between">
@@ -393,14 +361,25 @@ export default function ScrollableTimeline({
           </div>
         </div>
 
-        {/* Right side vertical timeline - this will scroll independently */}
-        <div className="flex-1 relative h-[calc(100vh-150px)]">
+        {/* Right side vertical timeline - scrollable content */}
+        <div className="flex-1 relative h-[calc(100vh-200px)] overflow-hidden">
           {/* Gradient overlays for scroll indication */}
           <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
 
           {/* Scrollable timeline */}
-          <div ref={timelineRef} className="h-full overflow-y-auto px-4">
+          <div
+            ref={timelineRef}
+            className="h-full overflow-y-auto px-4"
+            onScroll={() => {
+              // Add this to detect manual scrolling by user
+              isManualScrolling.current = true;
+              clearTimeout(timelineRef.current.scrollTimer);
+              timelineRef.current.scrollTimer = setTimeout(() => {
+                isManualScrolling.current = false;
+              }, 150);
+            }}
+          >
             <div className="py-16 relative">
               {/* Central timeline line */}
               <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gray-200 -translate-x-1/2" />
@@ -430,7 +409,10 @@ export default function ScrollableTimeline({
                         isSelected ? "scale-110" : "scale-100"
                       )}
                       style={{ backgroundColor: release.color }}
-                      onClick={() => setSelectedReleaseId(release.id)}
+                      onClick={() => {
+                        setSelectedReleaseId(release.id);
+                        scrollToRelease(release.id);
+                      }}
                     >
                       <div
                         className={cn("rounded-full", spacing.headerSize)}
@@ -454,7 +436,10 @@ export default function ScrollableTimeline({
                           ? "opacity-70 hover:opacity-100"
                           : "opacity-100"
                       )}
-                      onClick={() => setSelectedReleaseId(release.id)}
+                      onClick={() => {
+                        setSelectedReleaseId(release.id);
+                        scrollToRelease(release.id);
+                      }}
                     >
                       <div className="flex items-center gap-2">
                         <span>{release.name}</span>
