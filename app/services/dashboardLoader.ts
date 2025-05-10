@@ -310,3 +310,42 @@ export class DashboardLoader {
     return this.validateDashboardConfig(config, config.id || "unknown");
   }
 }
+
+export async function loadDashboardConfig(path: string): Promise<any> {
+  console.log(`Loading dashboard config for path: ${path}`);
+  
+  try {
+    // Check if we're running on the client side (browser)
+    if (typeof window !== 'undefined') {
+      console.log(`Fetching dashboard config from API for: ${path}`);
+      const response = await fetch(`/api/dashboard/${path}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`API response error (${response.status}): ${errorText}`);
+        throw new Error(`Failed to load dashboard configuration (Status: ${response.status})`);
+      }
+      
+      const rawConfig = await response.json();
+      console.log("Raw config received:", rawConfig);
+      
+      // ...existing code...
+    } else {
+      // Server-side loading
+      console.log(`Server-side loading dashboard config for: ${path}`);
+      // Direct file system access for server-side rendering
+      
+      // ...existing code...
+    }
+    
+    // ...existing code...
+  } catch (error) {
+    console.error(`Error loading dashboard config for ${path}:`, error);
+    throw error;
+  }
+}

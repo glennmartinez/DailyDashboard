@@ -1,0 +1,13 @@
+# File: app/dashboards/main-daily.yml
+name: "Release Builds"
+description: "Releases for Valorant"
+widgets:
+  - id: "serpentine-chart1"
+    type: "serpentine-chart"
+    position:
+      row: 4 # Positioned right after tree-coverage
+      col: 0
+      width: 12 # Using width defined in registry
+      height: 6 # Explicitly set height to 6 rows
+    config:
+      title: "Project Timeline Q1 2023" # Custom title

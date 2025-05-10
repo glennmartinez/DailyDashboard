@@ -74,3 +74,11 @@ widgets:
       owner: "glennmartinez"
       repo: "habito-mobile"
       branch: "main" # Optional, defaults to 'main' if not specified
+  - id: "serpentine-chart1"
+    type: "serpentine-chart"
+    position:
+      row: 4 # Positioned right after tree-coverage
+      col: 0
+      width: 12 # Using width defined in registry
+    config:
+      title: "Project Timeline Q1 2023" # Custom title
